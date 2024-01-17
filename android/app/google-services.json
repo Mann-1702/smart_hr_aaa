@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "764910551841",
+    "project_id": "smart-hr-aaa",
+    "storage_bucket": "smart-hr-aaa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764910551841:android:a29c842e130355e5c67460",
+        "android_client_info": {
+          "package_name": "com.example.smart_hr_aaa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1HidENekXu3JLUiIS40tKNJUR2UKxUsg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -3,16 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:smart_hr_aaa/loginscreen.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
-// Future<void> main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await Firebase.initializeApp();
-//   runApp(const MyApp());
-// }
-
-void main() {
-
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options : const FirebaseOptions(
+      apiKey: 'AIzaSyC1HidENekXu3JLUiIS40tKNJUR2UKxUsg',
+      appId: '1:764910551841:android:a29c842e130355e5c67460',
+      messagingSenderId: '764910551841',
+      projectId: 'smart-hr-aaa'));
   runApp(const MyApp());
 }
+
+// void main() {
+//
+  // runApp(const MyApp());
+ //}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_hr_aaa/homescreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +19,8 @@ class _LoginScreenState extends State<LoginScreen> {
   double screenWidth=0;
 
   Color primary=const Color(0xffeef444c);
+
+  late SharedPreferences sharedPreferences;
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 bottomRight: Radius.circular(70),
               )
             ),
-            child: Center(
-              child: Icon(Icons.person, color: Colors.white, size: screenWidth/5,),
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 20),
+                  height: 300,
+                  child: Lottie.asset("assets/logingif.json"),
+                ),
+              ],
             ),
           ),
           Container(
@@ -66,12 +77,62 @@ class _LoginScreenState extends State<LoginScreen> {
                 customField("Enter your password",passController, true),
                 GestureDetector(
                   onTap: () async {
+                    FocusScope.of(context).unfocus();
                     String id=idController.text.trim();
                     String password=passController.text.trim();
-                    QuerySnapshot snap=await FirebaseFirestore.instance
-                        .collection("Employee").where('id', isEqualTo: id).get();
 
-                    print(snap.docs[0]['id']);
+
+                    if(id.isEmpty)
+                      {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar
+                          (content: Text("Employee ID is still empty!"),
+                        ));
+                      }
+                    else if(password.isEmpty)
+                      {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar
+                          (content: Text("Password is still empty!"),
+                        ));
+                      }
+                    else
+                      {
+                        QuerySnapshot snap=await FirebaseFirestore.instance
+                            .collection("Employee").where('id', isEqualTo: id).get();
+
+                        try{
+                          if(password==snap.docs[0]['password']){
+                            sharedPreferences = await SharedPreferences.getInstance();
+
+                            sharedPreferences.setString('employeeId', id).then((_) {
+                              Navigator.pushReplacement(context,
+                                  MaterialPageRoute(builder: (context) => HomeScreen()));
+                            });
+                          }
+                          else{
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text("Password is not correct"),
+                            ));
+                          }
+                        }
+                        catch(e){
+                          String error = " ";
+
+                          if(e.toString() == "RangeError (index): Invalid value: Valid value range is empty: 0")
+                          {
+                            setState(() {
+                              error = "Employee id does not exist!";
+                            });
+                          }
+                          else {
+                            setState(() {
+                              error="Error occurred!";
+                            });
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(error),
+                          ));
+                        }
+                      }
                   },
                   child: Container(
                     height: 60,

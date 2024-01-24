@@ -1,9 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:smart_hr_aaa/calendarscreen.dart';
-import 'package:smart_hr_aaa/model/user.dart';
 import 'package:smart_hr_aaa/profilescreen.dart';
 import 'package:smart_hr_aaa/todayscreen.dart';
 
@@ -21,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Color primary=const Color(0xffeef444c);
 
-  int currentIndex = 0;
+  int currentIndex = 1;
 
   List<IconData> navigationIcons = [
     FontAwesomeIcons.calendarDays,
@@ -29,27 +26,27 @@ class _HomeScreenState extends State<HomeScreen> {
     FontAwesomeIcons.userLarge,
   ];
 
-  @override
-  void initState() {
-    super.initState();
+  // @override
+  // void initState() {
+  //   super.initState();
+  //
+  //   getID();
+  //
+  //
+  // }
 
-    getID();
-
-
-  }
-
-  void getID() async {
-    QuerySnapshot snap = await FirebaseFirestore.instance
-        .collection('employee')
-        .where('id', isEqualTo: User.employeeid)
-        .get();
-
-
-    setState(() {
-      User.id = snap.docs[0].id;
-
-    });
-  }
+  // void getID() async {
+  //   QuerySnapshot snap = await FirebaseFirestore.instance
+  //       .collection('employee')
+  //       .where('id', isEqualTo: User.employeeid)
+  //       .get();
+  //
+  //
+  //   setState(() {
+  //     User.id = snap.docs[0].id;
+  //
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {

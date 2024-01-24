@@ -11,6 +11,11 @@ class _TodayScreenState extends State<TodayScreen> {
   double screenHeight=0;
   double screenWidth=0;
 
+  String checkIn = "--/--";
+  String checkOut = "--/--";
+
+  Color primary = const Color(0xffeef444c);
+
   @override
   Widget build(BuildContext context) {
     screenHeight=MediaQuery.of(context).size.height;

@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const KeyboardVisibilityProvider(
-        child: AuthCheck(),
+        child: LoginScreen(),
       ),
     );
   }
@@ -67,7 +67,7 @@ class _AuthCheckState extends State<AuthCheck> {
     try {
       if(sharedPreferences.getString('employeeId') != null) {
         setState(() {
-          User.username = sharedPreferences.getString('employeeId')!;
+          User.employeeid = sharedPreferences.getString('employeeId')!;
           userAvailable = true;
         });
       }

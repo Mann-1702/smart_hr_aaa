@@ -108,7 +108,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         ),
                                       ),
                                       Text(
-                                        checkIn,
+                                        snap[index]['checkOut'],
                                         style: TextStyle(
                                           fontFamily: "NexaBold",
                                           fontSize: screenWidth/18,

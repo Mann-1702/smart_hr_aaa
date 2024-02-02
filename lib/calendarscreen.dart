@@ -66,7 +66,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
         ]
             ),
-            Container(
+            SizedBox(
               height: screenHeight - screenHeight / 5,
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance.collection("Employee").doc(User.id).collection("Record").snapshots(),
@@ -86,7 +86,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   color: Colors.black26,
                                   blurRadius: 10,
                                   offset: Offset(2, 2),
-                                ),
+                                   ),
                               ],
                               borderRadius: BorderRadius.all(Radius.circular(20)),
                             ),

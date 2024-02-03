@@ -1,5 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:month_year_picker/month_year_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_hr_aaa/loginscreen.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -14,6 +16,8 @@ Future<void> main() async {
       appId: '1:764910551841:android:a29c842e130355e5c67460',
       messagingSenderId: '764910551841',
       projectId: 'smart-hr-aaa'));
+  FirebaseStorage.instanceFor(bucket: 'smart-hr-aaa.appspot.com');
+
   runApp(const MyApp());
 }
 
@@ -36,8 +40,11 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const KeyboardVisibilityProvider(
-        child: LoginScreen(),
+        child: AuthCheck(),
       ),
+      localizationsDelegates: const [
+        MonthYearPickerLocalizations.delegate,
+      ],
     );
   }
 }
@@ -67,7 +74,7 @@ class _AuthCheckState extends State<AuthCheck> {
     try {
       if(sharedPreferences.getString('employeeId') != null) {
         setState(() {
-          User.employeeid = sharedPreferences.getString('employeeId')!;
+          User.employeeId = sharedPreferences.getString('employeeId')!;
           userAvailable = true;
         });
       }

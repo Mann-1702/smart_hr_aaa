@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const KeyboardVisibilityProvider(
-        child: AuthCheck(),
+        child: AuthCheck(), 
       ),
       localizationsDelegates: const [
         MonthYearPickerLocalizations.delegate,

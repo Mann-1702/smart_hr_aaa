@@ -336,7 +336,7 @@ class _TodayScreenState extends State<TodayScreen> {
 
                         key.currentState!.reset();
                       } else {
-                        Timer(const Duration(seconds: 6), () async {
+                        Timer(const Duration(seconds: 9), () async {
                           _getLocation();
                           QuerySnapshot snap = await FirebaseFirestore.instance
                               .collection(("Employee"))

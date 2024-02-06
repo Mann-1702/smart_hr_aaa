@@ -36,10 +36,10 @@ class _LoginScreenState extends State<LoginScreen> {
             height: screenHeight/2.5,
             width: screenWidth,
             decoration: BoxDecoration(
-              color: primary,
-              borderRadius: const BorderRadius.only(
-                bottomRight: Radius.circular(70),
-              )
+                color: primary,
+                borderRadius: const BorderRadius.only(
+                  bottomRight: Radius.circular(70),
+                )
             ),
             child: Column(
               children: [
@@ -53,14 +53,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           Container(
             margin: EdgeInsets.only(top: screenHeight/15,
-            bottom: screenHeight/20,
+              bottom: screenHeight/20,
             ),
             child: Text(
-              "Login",
-              style: TextStyle(
-                fontSize: screenWidth/18,
-                fontFamily: "NexaBold",
-              )
+                "Login",
+                style: TextStyle(
+                  fontSize: screenWidth/18,
+                  fontFamily: "NexaBold",
+                )
             ),
           ),
           Container(
@@ -83,56 +83,56 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
                     if(id.isEmpty)
-                      {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar
-                          (content: Text("Employee ID is still empty!"),
-                        ));
-                      }
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar
+                        (content: Text("Employee ID is still empty!"),
+                      ));
+                    }
                     else if(password.isEmpty)
-                      {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar
-                          (content: Text("Password is still empty!"),
-                        ));
-                      }
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar
+                        (content: Text("Password is still empty!"),
+                      ));
+                    }
                     else
-                      {
-                        QuerySnapshot snap=await FirebaseFirestore.instance
-                            .collection("Employee").where('id', isEqualTo: id).get();
+                    {
+                      QuerySnapshot snap=await FirebaseFirestore.instance
+                          .collection("Employee").where('id', isEqualTo: id).get();
 
-                        try{
-                          if(password==snap.docs[0]['password']){
-                            sharedPreferences = await SharedPreferences.getInstance();
+                      try{
+                        if(password==snap.docs[0]['password']){
+                          sharedPreferences = await SharedPreferences.getInstance();
 
-                            sharedPreferences.setString('employeeId', id).then((_) {
-                              Navigator.pushReplacement(context,
-                                  MaterialPageRoute(builder: (context) => HomeScreen()));
-                            });
-                          }
-                          else{
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                              content: Text("Password is not correct"),
-                            ));
-                          }
+                          sharedPreferences.setString('employeeId', id).then((_) {
+                            Navigator.pushReplacement(context,
+                                MaterialPageRoute(builder: (context) => HomeScreen()));
+                          });
                         }
-                        catch(e){
-                          String error = " ";
-
-                          if(e.toString() == "RangeError (index): Invalid value: Valid value range is empty: 0")
-                          {
-                            setState(() {
-                              error = "Employee id does not exist!";
-                            });
-                          }
-                          else {
-                            setState(() {
-                              error="Error occurred!";
-                            });
-                          }
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(error),
+                        else{
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text("Password is not correct"),
                           ));
                         }
                       }
+                      catch(e){
+                        String error = " ";
+
+                        if(e.toString() == "RangeError (index): Invalid value: Valid value range is empty: 0")
+                        {
+                          setState(() {
+                            error = "Employee id does not exist!";
+                          });
+                        }
+                        else {
+                          setState(() {
+                            error="Error occurred!";
+                          });
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(error),
+                        ));
+                      }
+                    }
                   },
                   child: Container(
                     height: 60,
@@ -204,23 +204,23 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(right: screenWidth/12),
-                child: TextFormField(
-                  controller: controller,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: screenHeight/35,
-                    ),
-                    border: InputBorder.none,
-                    hintText: hint,
+            child: Padding(
+              padding: EdgeInsets.only(right: screenWidth/12),
+              child: TextFormField(
+                controller: controller,
+                enableSuggestions: false,
+                autocorrect: false,
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: screenHeight/35,
                   ),
-                  maxLines: 1,
-                  obscureText: obscure,
+                  border: InputBorder.none,
+                  hintText: hint,
                 ),
+                maxLines: 1,
+                obscureText: obscure,
               ),
+            ),
           )
         ],
       ),

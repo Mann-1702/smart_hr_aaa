@@ -8,6 +8,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:smart_hr_aaa/model/user.dart';
+import 'package:smart_hr_aaa/myrewards.dart';
+import 'package:smart_hr_aaa/profilescreen.dart';
 import 'package:smart_hr_aaa/services/location_service.dart';
 
 class TodayScreen extends StatefulWidget {
@@ -82,7 +84,7 @@ class _TodayScreenState extends State<TodayScreen> {
         ScanMode.QR,
       );
     } catch(e){
-        print("Error");
+      print("Error");
     }
 
     setState(() {
@@ -111,10 +113,10 @@ class _TodayScreenState extends State<TodayScreen> {
         checkOut=snap2['checkOut'];
       });
     } catch (e) {
-        setState(() {
-          checkIn="--/--";
-          checkOut="--/--";
-        });
+      setState(() {
+        checkIn="--/--";
+        checkOut="--/--";
+      });
     }
   }
 
@@ -124,13 +126,91 @@ class _TodayScreenState extends State<TodayScreen> {
     screenWidth=MediaQuery.of(context).size.width;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Smart HR',
+          style: TextStyle(
+            fontFamily: 'NexaBold',
+          ),
+        ),
+
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Color(0xffeef444c),
+              ),
+              child:  Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ProfileScreen()));
+                    },
+                    child: const CircleAvatar(
+                      backgroundColor: Colors.white,
+                      radius: 40,
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.black26,
+                        size: 55,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+                  Text(
+                    'Hello, ' + User.employeeId,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'NexaBold',
+                      fontSize: 24,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              title: const Text(
+                'Rewards',
+                style: TextStyle(
+                  fontFamily: 'NexaRegular',
+                  fontSize: 17,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyRewards()));
+              },
+            ),
+            const ListTile(
+              title: Text(
+                'Training & Development',
+                style: TextStyle(
+                  fontFamily: 'NexaRegular',
+                  fontSize: 17,
+                ),
+              ),
+              // onTap: () {
+              //   // Navigator.pop(context);
+              // },
+            ),
+            // Add more ListTile items as needed
+          ],
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             Container(
               alignment: Alignment.centerLeft,
-              margin: const EdgeInsets.only(top: 32),
               child: Text(
                 "Welcome, ",
                 style: TextStyle(
@@ -230,113 +310,61 @@ class _TodayScreenState extends State<TodayScreen> {
               ),
             ),
             Container(
-              alignment: Alignment.centerLeft,
-              child: RichText(
-                text: TextSpan(
-                  text: DateTime.now().day.toString(),
-                  style: TextStyle(
-                    color: primary,
-                    fontSize: screenWidth/18,
-                    fontFamily: "NexaBold",
-                  ),
-                  children: [
-                    TextSpan(
-                      text: DateFormat(' MMMM yyyy').format(DateTime.now()),
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: screenWidth/20,
-                      )
+                alignment: Alignment.centerLeft,
+                child: RichText(
+                  text: TextSpan(
+                    text: DateTime.now().day.toString(),
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: screenWidth/18,
+                      fontFamily: "NexaBold",
                     ),
-                  ],
-                ),
-              )
+                    children: [
+                      TextSpan(
+                          text: DateFormat(' MMMM yyyy').format(DateTime.now()),
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: screenWidth/20,
+                          )
+                      ),
+                    ],
+                  ),
+                )
             ),
             StreamBuilder(
-              stream: Stream.periodic(const Duration(seconds: 1)),
-              builder: (context, snapshot) {
-                return Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    DateFormat('hh:mm:ss a').format(DateTime.now()),
-                    style: TextStyle(
-                      fontFamily: "NexaRegular",
-                      fontSize: screenWidth/20,
-                      color: Colors.black54,
+                stream: Stream.periodic(const Duration(seconds: 1)),
+                builder: (context, snapshot) {
+                  return Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      DateFormat('hh:mm:ss a').format(DateTime.now()),
+                      style: TextStyle(
+                        fontFamily: "NexaRegular",
+                        fontSize: screenWidth/20,
+                        color: Colors.black54,
+                      ),
                     ),
-                  ),
-                );
-              }
+                  );
+                }
             ),
             checkOut == "--/--" ? Container(
               margin: const EdgeInsets.only(top: 24, bottom: 12),
               child: Builder(
-                builder: (context) {
-                  final GlobalKey<SlideActionState> key = GlobalKey();
-                  return SlideAction(
-                    text: checkIn == "--/--" ? "Slide to Check In" : "Slide to Check Out",
-                    textStyle: TextStyle(
-                      color: Colors.black54,
-                      fontSize: screenWidth/20,
-                      fontFamily: "NexaRegular",
-                    ),
-                    outerColor: Colors.white,
-                    innerColor: primary,
-                    key: key,
-                    onSubmit: () async {
+                  builder: (context) {
+                    final GlobalKey<SlideActionState> key = GlobalKey();
+                    return SlideAction(
+                      text: checkIn == "--/--" ? "Slide to Check In" : "Slide to Check Out",
+                      textStyle: TextStyle(
+                        color: Colors.black54,
+                        fontSize: screenWidth/20,
+                        fontFamily: "NexaRegular",
+                      ),
+                      outerColor: Colors.white,
+                      innerColor: primary,
+                      key: key,
+                      onSubmit: () async {
 
-                      if(User.lat != 0) {
-                        _getLocation();
-                        QuerySnapshot snap = await FirebaseFirestore.instance
-                            .collection(("Employee"))
-                            .where('id', isEqualTo: User.employeeId)
-                            .get();
-
-                        DocumentSnapshot snap2 = await FirebaseFirestore.instance
-                            .collection("Employee")
-                            .doc(snap.docs[0].id)
-                            .collection("Record")
-                            .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
-                            .get();
-
-
-                        try {
-                          String checkIn = snap2['checkIn'];
-
-                          setState(() {
-                            checkOut=DateFormat('hh:mm').format(DateTime.now());
-                          });
-
-                          await FirebaseFirestore.instance
-                              .collection("Employee")
-                              .doc(snap.docs[0].id)
-                              .collection("Record")
-                              .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
-                              .update({
-                            'date': Timestamp.now(),
-                            'checkIn': checkIn,
-                            'checkOut': DateFormat('hh:mm').format(DateTime.now()),
-                            'checkOutLocation': location,
-                          });
-                        } catch (e) {
-                          setState(() {
-                            checkIn=DateFormat('hh:mm').format(DateTime.now());
-                          });
-                          await FirebaseFirestore.instance
-                              .collection("Employee")
-                              .doc(snap.docs[0].id)
-                              .collection("Record")
-                              .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
-                              .set({
-                            'date': Timestamp.now(),
-                            'checkIn':DateFormat('hh:mm').format(DateTime.now()),
-                            'checkOut': "--/--",
-                            'checkInLocation': location,
-                          });
-                        }
-
-                        key.currentState!.reset();
-                      } else {
-                        Timer(const Duration(seconds: 9), () async {
+                        if(User.lat != 0) {
                           _getLocation();
                           QuerySnapshot snap = await FirebaseFirestore.instance
                               .collection(("Employee"))
@@ -367,7 +395,7 @@ class _TodayScreenState extends State<TodayScreen> {
                               'date': Timestamp.now(),
                               'checkIn': checkIn,
                               'checkOut': DateFormat('hh:mm').format(DateTime.now()),
-                              'location': location,
+                              'checkOutLocation': location,
                             });
                           } catch (e) {
                             setState(() {
@@ -382,16 +410,68 @@ class _TodayScreenState extends State<TodayScreen> {
                               'date': Timestamp.now(),
                               'checkIn':DateFormat('hh:mm').format(DateTime.now()),
                               'checkOut': "--/--",
-                              'location': location,
+                              'checkInLocation': location,
                             });
                           }
 
                           key.currentState!.reset();
-                        });
-                      }
-                    },
-                  );
-                }
+                        } else {
+                          Timer(const Duration(seconds: 9), () async {
+                            _getLocation();
+                            QuerySnapshot snap = await FirebaseFirestore.instance
+                                .collection(("Employee"))
+                                .where('id', isEqualTo: User.employeeId)
+                                .get();
+
+                            DocumentSnapshot snap2 = await FirebaseFirestore.instance
+                                .collection("Employee")
+                                .doc(snap.docs[0].id)
+                                .collection("Record")
+                                .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
+                                .get();
+
+
+                            try {
+                              String checkIn = snap2['checkIn'];
+
+                              setState(() {
+                                checkOut=DateFormat('hh:mm').format(DateTime.now());
+                              });
+
+                              await FirebaseFirestore.instance
+                                  .collection("Employee")
+                                  .doc(snap.docs[0].id)
+                                  .collection("Record")
+                                  .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
+                                  .update({
+                                'date': Timestamp.now(),
+                                'checkIn': checkIn,
+                                'checkOut': DateFormat('hh:mm').format(DateTime.now()),
+                                'location': location,
+                              });
+                            } catch (e) {
+                              setState(() {
+                                checkIn=DateFormat('hh:mm').format(DateTime.now());
+                              });
+                              await FirebaseFirestore.instance
+                                  .collection("Employee")
+                                  .doc(snap.docs[0].id)
+                                  .collection("Record")
+                                  .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
+                                  .set({
+                                'date': Timestamp.now(),
+                                'checkIn':DateFormat('hh:mm').format(DateTime.now()),
+                                'checkOut': "--/--",
+                                'location': location,
+                              });
+                            }
+
+                            key.currentState!.reset();
+                          });
+                        }
+                      },
+                    );
+                  }
               ),
             ) : Container(
               margin: const EdgeInsets.only(top: 32, bottom: 32),

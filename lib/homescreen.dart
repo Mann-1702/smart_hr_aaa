@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
         User.address=doc['address'];
       });
     } catch(e) {
-        return;
+      return;
     }
   }
 
@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               size: i == currentIndex ? 27 : 22,
                             ),
                             i == currentIndex ? Container(
-                              margin: EdgeInsets.only(top: 6),
+                              margin: const EdgeInsets.only(top: 6),
                               height: 3,
                               width: 19,
                               decoration: BoxDecoration(

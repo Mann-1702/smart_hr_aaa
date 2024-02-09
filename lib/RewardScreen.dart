@@ -1,6 +1,6 @@
 //import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:smart_hr_aaa/LeaderBoard.dart';
 import 'package:smart_hr_aaa/MyRewards.dart';
 import 'package:smart_hr_aaa/LeaderBoard.dart';
 
@@ -17,7 +17,7 @@ class RewardScreen extends StatelessWidget {
         ),
         body: Column(
           children: [
-            const TabBar(
+            TabBar(
               tabs: [
                 Tab(
                   icon: Icon(
@@ -38,7 +38,7 @@ class RewardScreen extends StatelessWidget {
                   //myrewards
                   MyRewards(),
                   //leaderboard
-
+                  LeaderBoard(),
                 ])
             )
           ],

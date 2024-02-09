@@ -1,104 +1,25 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import 'model/user.dart';
+class PointAccumulationPage extends StatelessWidget {
 
-class PointAccumulationPage extends StatefulWidget {
-  @override
-  _PointAccumulationPageState createState() => _PointAccumulationPageState();
-
-  const PointAccumulationPage({super.key});
-}
-
-class _PointAccumulationPageState extends State<PointAccumulationPage> {
-  int totalPoints = 0; // Total accumulated points
-
-  // Example method to fetch check-in and check-out times from Firebase
-  Future<void> fetchCheckInOutTimes() async {
-    // Replace 'your_firestore_collection' with the actual collection name in your Firestore database
-    QuerySnapshot snap = await FirebaseFirestore.instance
-        .collection(("Employee"))
-        .where('id', isEqualTo: User.employeeId)
-        .get();
-
-    DocumentSnapshot snap2 = await FirebaseFirestore.instance
-        .collection("Employee")
-        .doc(snap.docs[0].id)
-        .collection("Record")
-        .doc(DateFormat('HH:mm').format(DateTime.now()))
-        .get();
-
-    // Fetch check-in and check-out times
-    QuerySnapshot checkInSnapshot = snap2['checkIn'];
-    QuerySnapshot checkOutSnapshot = snap2['checkOut'];
-
-    int checkInCount = checkInSnapshot.size;
-    int checkOutCount = checkOutSnapshot.size;
-
-    // Calculate overtime hours based on your business rules
-    int overtimeHours = calculateOvertime(checkInSnapshot, checkOutSnapshot);
-
-    // Calculate points
-    setState(() {
-      totalPoints = calculatePoints(checkInCount, checkOutCount, overtimeHours);
-    });
-  }
-
-  // Example method to calculate overtime hours based on check-in and check-out times
-  int calculateOvertime(QuerySnapshot checkInSnapshot, QuerySnapshot checkOutSnapshot) {
-    // Implement your logic to calculate overtime hours based on check-in and check-out times
-    // For simplicity, assume that overtime is calculated for every hour worked beyond 8 hours
-    DateTime eightHoursAgo = DateTime.now().subtract(Duration(minutes: 1));
-
-    int overtimeHours = 0;
-
-    for (QueryDocumentSnapshot checkIn in checkInSnapshot.docs) {
-      for (QueryDocumentSnapshot checkOut in checkOutSnapshot.docs) {
-        if (checkIn['timestamp'].toDate().isBefore(eightHoursAgo) &&
-            checkOut['timestamp'].toDate().isAfter(checkIn['timestamp'].toDate())) {
-          // Calculate hours between check-in and check-out
-          int hoursWorked = checkOut['timestamp'].toDate().difference(checkIn['timestamp'].toDate()).inHours;
-
-          // Update overtime hours
-          overtimeHours += (hoursWorked > 1) ? (hoursWorked - 1) : 0;
-        }
-      }
-    }
-
-    return overtimeHours;
-  }
-
-  // Example method to calculate points based on check-in, check-out, and overtime
-  int calculatePoints(int checkInCount, int checkOutCount, int overtimeHours) {
-    // Calculate points based on your business rules
-    int checkInPoints = 5; // Points for each check-in
-    int checkOutPoints = 3; // Points for each check-out
-    int overtimePoints = 2; // Points for each overtime hour
-
-    int checkInTotalPoints = checkInCount * checkInPoints;
-    int checkOutTotalPoints = checkOutCount * checkOutPoints;
-    int overtimeTotalPoints = overtimeHours * overtimePoints;
-
-    // Calculate total points
-    return checkInTotalPoints + checkOutTotalPoints + overtimeTotalPoints;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchCheckInOutTimes(); // Fetch check-in and check-out times when the widget is initialized
-  }
+  Color primary=const Color(0xffeef444c);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Point Accumulation',style: TextStyle(color: Colors.white),),
-        backgroundColor: Colors.redAccent,
+        title: const Text('Point Accumulation',
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'NexaBold',
+          ),),
+        backgroundColor: primary,
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Change this color to your desired color
+        ),
       ),
       body: Padding(
-        padding: EdgeInsets.only(top: 16.0), // Adjust the top padding as needed
+        padding: const EdgeInsets.only(top: 16.0), // Adjust the top padding as needed
         child: Scrollbar(
           child: SingleChildScrollView(
             child: Column(
@@ -122,24 +43,31 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                           color: Colors.redAccent.withOpacity(0.5),
                           spreadRadius: 5,
                           blurRadius: 7,
-                          offset: Offset(0, 3), // changes the position of the shadow
+                          offset: const Offset(0, 3), // changes the position of the shadow
                         ),
                       ],
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Icon(
-                          Icons.currency_rupee,
-                          color: Colors.yellow,
+                        Padding(
+                          padding: const EdgeInsets.only(left: 35.0), // Add left margin here
+                          child: Text(
+                            '125',
+                            style: TextStyle(
+                              fontFamily: 'NexaBold',
+                              fontSize: 28,
+                              color: primary,
+                            ),
+                          ),
                         ),
-                        Text('$totalPoints'),
-                        Text(
-                          'You gained $totalPoints points this month',
-                          style: TextStyle(color: Colors.black),
+                        const Text(
+                          'You gained 125 points this month',
+                          style: TextStyle(color: Colors.black, fontFamily: 'NexaRegular',fontSize: 15),
                         ),
                       ],
                     ),
+
                   ),
                 ),
 
@@ -147,12 +75,12 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                 const SizedBox(height: 16.0), // Add some space before the rectangle box
                 Container(
                   height: 150.0,width: 400,// Adjust the height as needed
-                  margin: EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
-                  padding: EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
+                  padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
                     color: Colors.white, // Adjust the color of the rectangle box
                     borderRadius: BorderRadius.circular(10.0), // Adjust the border radius as needed
-                    boxShadow: [
+                    boxShadow:  [
                       BoxShadow(
                         color: Colors.redAccent.withOpacity(0.5),
                         spreadRadius: 5,
@@ -174,7 +102,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                           fit: BoxFit.cover, // Adjust the fit as needed
                         ),
                       ),
-                      SizedBox(height: 8.0), // Add some space between the image and text
+                      const SizedBox(height: 8.0), // Add some space between the image and text
                       // Text
                       // Text
                       const Column(
@@ -223,8 +151,8 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                 const SizedBox(height: 8.0),
                 Container(
                   height: 150.0,width: 400,// Adjust the height as needed
-                  margin: EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
-                  padding: EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
+                  padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
                     color: Colors.white, // Adjust the color of the rectangle box
                     borderRadius: BorderRadius.circular(10.0), // Adjust the border radius as needed
@@ -233,7 +161,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                         color: Colors.redAccent.withOpacity(0.5),
                         spreadRadius: 5,
                         blurRadius: 7,
-                        offset: Offset(0, 3), // changes the position of the shadow
+                        offset: const Offset(0, 3), // changes the position of the shadow
                       ),
                     ],
                   ),
@@ -250,7 +178,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                           fit: BoxFit.cover, // Adjust the fit as needed
                         ),
                       ),
-                      SizedBox(height: 8.0), // Add some space between the image and text
+                      const SizedBox(height: 8.0), // Add some space between the image and text
                       // Text
                       // Text
                       const Column(
@@ -296,12 +224,12 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                   ),
                 ),
 
-                //Rectangle box3
+                //Rectangle box 3
                 const SizedBox(height: 8.0),
                 Container(
                   height: 150.0,width: 400,// Adjust the height as needed
-                  margin: EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
-                  padding: EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
+                  padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
                     color: Colors.white, // Adjust the color of the rectangle box
                     borderRadius: BorderRadius.circular(10.0), // Adjust the border radius as needed
@@ -351,7 +279,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                           ),
                           SizedBox(height: 1.0), // Add some space between the text and the top of the container
                           Text(
-                            'on the completion',
+                            'on the completition',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey,
@@ -374,11 +302,11 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                 ),
 
                 // Rectangle box 4
-                SizedBox(height: 8.0),
+                const SizedBox(height: 8.0),
                 Container(
                   height: 150.0,width: 400,// Adjust the height as needed
-                  margin: EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
-                  padding: EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
+                  padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
                     color: Colors.white, // Adjust the color of the rectangle box
                     borderRadius: BorderRadius.circular(10.0), // Adjust the border radius as needed
@@ -387,7 +315,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                         color: Colors.redAccent.withOpacity(0.5),
                         spreadRadius: 5,
                         blurRadius: 7,
-                        offset: Offset(0, 3), // changes the position of the shadow
+                        offset: const Offset(0, 3), // changes the position of the shadow
                       ),
                     ],
                   ),
@@ -404,7 +332,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                           fit: BoxFit.cover, // Adjust the fit as needed
                         ),
                       ),
-                      SizedBox(height: 8.0), // Add some space between the image and text
+                      const SizedBox(height: 8.0), // Add some space between the image and text
                       // Text
                       // Text
                       const Column(
@@ -428,7 +356,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                           ),
                           SizedBox(height: 1.0), // Add some space between the text and the top of the container
                           Text(
-                            'for contributing  ',
+                            'for contrubuting  ',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey,
@@ -451,11 +379,11 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                 ),
 
                 // Rectangle box 5
-                SizedBox(height: 8.0),
+                const SizedBox(height: 8.0),
                 Container(
                   height: 150.0,width: 400,// Adjust the height as needed
-                  margin: EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
-                  padding: EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
+                  padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
                     color: Colors.white, // Adjust the color of the rectangle box
                     borderRadius: BorderRadius.circular(10.0), // Adjust the border radius as needed
@@ -464,7 +392,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                         color: Colors.redAccent.withOpacity(0.5),
                         spreadRadius: 5,
                         blurRadius: 7,
-                        offset: Offset(0, 3), // changes the position of the shadow
+                        offset: const Offset(0, 3), // changes the position of the shadow
                       ),
                     ],
                   ),
@@ -481,7 +409,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                           fit: BoxFit.cover, // Adjust the fit as needed
                         ),
                       ),
-                      SizedBox(height: 8.0), // Add some space between the image and text
+                      const SizedBox(height: 8.0), // Add some space between the image and text
                       // Text
                       // Text
                       const Column(
@@ -528,11 +456,11 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                 ),
 
                 // Rectangle box 6
-                SizedBox(height: 8.0),
+                const SizedBox(height: 8.0),
                 Container(
                   height: 150.0,width: 400,// Adjust the height as needed
-                  margin: EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
-                  padding: EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
+                  padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
                     color: Colors.white, // Adjust the color of the rectangle box
                     borderRadius: BorderRadius.circular(10.0), // Adjust the border radius as needed
@@ -558,7 +486,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                           fit: BoxFit.cover, // Adjust the fit as needed
                         ),
                       ),
-                      SizedBox(height: 8.0), // Add some space between the image and text
+                      const SizedBox(height: 8.0), // Add some space between the image and text
                       // Text
                       // Text
                       const Column(
@@ -590,16 +518,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                           ),
                           SizedBox(height: 1.0), // Add some space between the text and the top of the container
                           Text(
-                            'for activities ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontFamily: "NexaRegular", // Adjust the font family as needed
-                            ),
-                          ),
-                          SizedBox(height: 1.0), // Add some space between the text and the top of the container
-                          Text(
-                            'participation.',
+                            'for activites ',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey,
@@ -612,82 +531,7 @@ class _PointAccumulationPageState extends State<PointAccumulationPage> {
                   ),
                 ),
 
-                // Rectangle box 7
-                SizedBox(height: 8.0),
-                Container(
-                  height: 150.0,width: 400,// Adjust the height as needed
-                  margin: EdgeInsets.symmetric(horizontal: 16.0), // Adjust the margin as needed
-                  padding: EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Adjust the color of the rectangle box
-                    borderRadius: BorderRadius.circular(10.0), // Adjust the border radius as needed
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.redAccent.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: Offset(0, 3), // changes the position of the shadow
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      // Profile Image
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(50.0), // Adjust the border radius to make it round
-                        child: Image.asset(
-                          'assets/images/handshake.png', // Replace with the path to your profile image asset
-                          height: 150.0, // Adjust the height of the profile image as needed
-                          width: 150.0, // Adjust the width of the profile image as needed
-                          fit: BoxFit.cover, // Adjust the fit as needed
-                        ),
-                      ),
-                      SizedBox(height: 8.0), // Add some space between the image and text
-                      // Text
-                      // Text
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Referral Points',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontFamily: "NexaBold",
-                            ),
-                          ),
-                          SizedBox(height: 8.0), // Add some space between the text and the top of the container
-                          Text(
-                            'You get the 15 points ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontFamily: "NexaRegular", // Adjust the font family as needed
-                            ),
-                          ),
-                          SizedBox(height: 1.0), // Add some space between the text and the top of the container
-                          Text(
-                            'on referral  ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontFamily: "NexaRegular", // Adjust the font family as needed
-                            ),
-                          ),
-                          SizedBox(height: 1.0), // Add some space between the text and the top of the container
-                          Text(
-                            'submission.',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontFamily: "NexaRegular", // Adjust the font family as needed
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+
               ],
             ),
           ),

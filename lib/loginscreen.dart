@@ -5,6 +5,8 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_hr_aaa/homescreen.dart';
 
+import 'admintodayscreen.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -104,8 +106,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           sharedPreferences = await SharedPreferences.getInstance();
 
                           sharedPreferences.setString('employeeId', id).then((_) {
-                            Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (context) => HomeScreen()));
+                            if (id == "admin@123" && password == "admin@123") {
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AdminTodayScreen()));
+                            } else {
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+                            }
                           });
                         }
                         else{
@@ -221,7 +226,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: obscure,
               ),
             ),
-          )
+          ),
+
         ],
       ),
     );

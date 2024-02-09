@@ -1,14 +1,23 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_hr_aaa/profilescreen.dart';
-import 'package:smart_hr_aaa/todayscreen.dart';
+import 'package:smart_hr_aaa/admintodayscreen.dart';
+
 import 'PointAccumulationPage.dart';
 import 'RedemOptionpage.dart';
 import 'ReferralBonusespage.dart';
-import 'calendarscreen.dart';
+import 'adminpointaccumulation.dart';
 import 'homescreen.dart';
 import 'model/user.dart';
 
-class MyRewards extends StatelessWidget {
+class AdminRewards extends StatefulWidget {
+  const AdminRewards({super.key});
+
+  @override
+  State<AdminRewards> createState() => _AdminRewardsState();
+}
+
+class _AdminRewardsState extends State<AdminRewards> {
+
   Color primary = const Color(0xffeef444c);
 
   @override
@@ -16,7 +25,7 @@ class MyRewards extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'My Rewards',
+          'Reward Settings',
           style: TextStyle(
             fontFamily: 'NexaRegular',
             color: Colors.white,
@@ -24,21 +33,21 @@ class MyRewards extends StatelessWidget {
         ),
         backgroundColor: primary,
         iconTheme: const IconThemeData(
-          color: Colors.white, // Change this color to your desired color
+          color: Colors.white,
         ),
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
-              decoration: const BoxDecoration(
+            const DrawerHeader(
+              decoration: BoxDecoration(
                 color: Color(0xffeef444c),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     backgroundColor: Colors.white,
                     radius: 40,
                     child: Icon(
@@ -47,10 +56,10 @@ class MyRewards extends StatelessWidget {
                       size: 55,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   Text(
-                    'Hello, ${User.employeeId}',
-                    style: const TextStyle(
+                    'Hello, Admin',
+                    style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'NexaBold',
                       fontSize: 24,
@@ -69,13 +78,13 @@ class MyRewards extends StatelessWidget {
               ),
               onTap: () {
                 Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()));
+                    MaterialPageRoute(builder: (context) => const AdminTodayScreen()));
                 // Navigator.popUntil(context, ModalRoute.withName('/'));
               },
             ),
             ListTile(
               title: Text(
-                'Rewards',
+                'Reward Settings',
                 style: TextStyle(
                   fontFamily: 'NexaRegular',
                   fontSize: 17,
@@ -139,7 +148,7 @@ class MyRewards extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => PointAccumulationPage(),
+                              builder: (context) => const AdminPointAccumulation(),
                             ),
                           );
                         },
@@ -159,93 +168,13 @@ class MyRewards extends StatelessWidget {
                             Icon(Icons.star, color: Colors.yellow), // Icon
                             SizedBox(width: 8),
                             Text(
-                              'Point Accumulation',
+                              'Point Accumulation Settings',
                               style: TextStyle(fontSize: 16, fontFamily: 'NexaRegular'),
                             ),
                           ],
                         ),
                       ),
                     ],
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // Handle the button press for Container 1
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ReferralBonusespage(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary, // Background color
-                            foregroundColor: Colors.white, // Text color
-                            elevation: 5, // Elevation
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10), // BorderRadius
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 37), // Padding
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.money, color: Colors.yellow), // Icon
-                              SizedBox(width: 8),
-                              Text(
-                                'Referral Bonus',
-                                style: TextStyle(fontSize: 16, fontFamily: 'NexaRegular'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // Handle the button press for Container 1
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RedemOptionpage(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary, // Background color
-                            foregroundColor: Colors.white, // Text color
-                            elevation: 5, // Elevation
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10), // BorderRadius
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 37), // Padding
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.redeem, color: Colors.yellow), // Icon
-                              SizedBox(width: 8),
-                              Text(
-                                'Redeem Option',
-                                style: TextStyle(fontSize: 16, fontFamily: 'NexaRegular'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ],
               ),

@@ -3,31 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 import 'package:smart_hr_aaa/profilescreen.dart';
+import 'package:smart_hr_aaa/model/user.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
+
 
 import 'MyRewards.dart';
-import 'model/user.dart';
 
 class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
+  const CalendarScreen({Key? key}) : super(key: key);
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-
-  double screenHeight=0;
-  double screenWidth=0;
+  late double screenHeight;
+  late double screenWidth;
 
   Color primary = const Color(0xffeef444c);
 
-  String _month = DateFormat('MMMM').format(DateTime.now());
+  late DateTime selectedMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMonth = DateTime.now();
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    screenHeight=MediaQuery.of(context).size.height;
-    screenWidth=MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -36,7 +42,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             fontFamily: 'NexaBold',
           ),
         ),
-
       ),
       drawer: Drawer(
         child: ListView(
@@ -79,6 +84,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
             ListTile(
+              title: Text(
+                'Home',
+                style: TextStyle(
+                  fontFamily: 'NexaRegular',
+                  fontSize: 17,
+                  color: primary,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
               title: const Text(
                 'Rewards',
                 style: TextStyle(
@@ -104,23 +122,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
               //   // Navigator.pop(context);
               // },
             ),
-            // Add more ListTile items as needed
+            Container(
+              margin: const EdgeInsets.only(top: 280),
+            ),
+            const Divider(),
+            const ListTile(
+              title: Text(
+                'Copyright © 2024 TechnoGuide Infosoft',
+                style: TextStyle(
+                  fontFamily: 'NexaRegular',
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
           ],
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(top: 0,left: 20,right: 20),
+        padding: const EdgeInsets.only(top: 0, left: 20, right: 20),
         child: Column(
           children: [
             Container(
               alignment: Alignment.centerLeft,
-              margin: const EdgeInsets.only(top: 0,left: 90),
+              margin: const EdgeInsets.only(top: 0, left: 90),
               child: Text(
                 "My Attendance",
                 style: TextStyle(
                   decoration: TextDecoration.underline,
                   fontFamily: "NexaBold",
-                  fontSize: screenWidth/18,
+                  fontSize: screenWidth / 18,
                 ),
               ),
             ),
@@ -130,56 +161,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   alignment: Alignment.centerLeft,
                   margin: const EdgeInsets.only(top: 5),
                   child: Text(
-                    _month,
+                    DateFormat('MMMM yyyy').format(selectedMonth),
                     style: TextStyle(
                       fontFamily: "NexaBold",
-                      fontSize: screenWidth/18,
+                      fontSize: screenWidth / 18,
                     ),
                   ),
                 ),
                 Container(
                   alignment: Alignment.centerRight,
-                  margin: const EdgeInsets.only(top: 5,bottom: 10),
+                  margin: const EdgeInsets.only(top: 5, bottom: 10),
                   child: GestureDetector(
                     onTap: () async {
-                      final month = await showMonthYearPicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2022),
-                          lastDate: DateTime(2099),
-                          builder: (context, child) {
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                colorScheme: ColorScheme.light(
-                                  primary: primary,
-                                  secondary: primary,
-                                  onSecondary: Colors.white,
-                                ),
-                                textButtonTheme: TextButtonThemeData(
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: primary,
-                                  ),
-                                ),
-                                textTheme:  const TextTheme(
-                                  headlineMedium: TextStyle(
-                                    fontFamily: "NexaBold",
-                                  ),
-                                  labelSmall: TextStyle(
-                                    fontFamily: "NexaBold",
-                                  ),
-                                  labelLarge: TextStyle(
-                                    fontFamily: "NexaBold",
-                                  ),
-                                ),
-                              ),
-                              child: child!,
-                            );
-                          }
+                      final DateTime? picked = await showMonthPicker(
+                        context: context,
+                        initialDate: selectedMonth,
+                        firstDate: DateTime(2022),
+                        lastDate: DateTime(2099),
                       );
 
-                      if(month != null) {
+                      if (picked != null && picked != selectedMonth) {
                         setState(() {
-                          _month = DateFormat('MMMM').format(month);
+                          selectedMonth = picked;
                         });
                       }
                     },
@@ -188,7 +191,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       style: TextStyle(
                         color: primary,
                         fontFamily: "NexaBold",
-                        fontSize: screenWidth/18,
+                        fontSize: screenWidth / 18,
                       ),
                     ),
                   ),
@@ -198,104 +201,113 @@ class _CalendarScreenState extends State<CalendarScreen> {
             Container(
               height: screenHeight / 1.45,
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection("Employee").doc(User.id).collection("Record").snapshots(),
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
+                stream: FirebaseFirestore.instance
+                    .collection("Employee")
+                    .doc(User.id)
+                    .collection("Record")
+                    .snapshots(),
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasData) {
-                    final snap =  snapshot.data!.docs;
+                    final snap = snapshot.data!.docs;
                     return ListView.builder(
                       itemCount: snap.length,
-                      itemBuilder: (context, index){
-                        return DateFormat('MMMM').format(snap[index]['date'].toDate()) == _month ? Container(
-                          margin: EdgeInsets.only(top: index > 0 ? 12 : 0, left: 6, right: 6),
-                          height: 80,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 10,
-                                offset: Offset(2, 2),
-                              ),
-                            ],
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  margin: const EdgeInsets.only(),
-                                  decoration: BoxDecoration(
-                                    color: primary,
-                                    borderRadius: const BorderRadius.all(Radius.circular(20)),
+                      itemBuilder: (context, index) {
+                        final recordDate = snap[index]['date'] as Timestamp;
+                        final formattedDate = DateFormat('MMMM yyyy').format(recordDate.toDate());
+                        if (formattedDate == DateFormat('MMMM yyyy').format(selectedMonth)) {
+                          return Container(
+                            margin: EdgeInsets.only(top: index > 0 ? 12 : 0, left: 6, right: 6),
+                            height: 80,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 10,
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
+                              borderRadius: BorderRadius.all(Radius.circular(20)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(),
+                                    decoration: BoxDecoration(
+                                      color: primary,
+                                      borderRadius: const BorderRadius.all(Radius.circular(20)),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        DateFormat('EE\ndd').format(recordDate.toDate()),
+                                        style: TextStyle(
+                                          fontFamily: "NexaBold",
+                                          fontSize: screenWidth / 20,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      DateFormat('EE\ndd').format(snap[index]['date'].toDate()),
-                                      style: TextStyle(
-                                        fontFamily: "NexaBold",
-                                        fontSize: screenWidth / 20,
-                                        color: Colors.white,
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Check In",
+                                        style: TextStyle(
+                                          fontFamily: "NexaRegular",
+                                          fontSize: screenWidth / 20,
+                                          color: Colors.black54,
+                                        ),
                                       ),
-                                    ),
+                                      Text(
+                                        DateFormat.Hm().format(snap[index]['checkIn'].toDate()), // Format DateTime to display only time
+                                        style: TextStyle(
+                                          fontFamily: "NexaBold",
+                                          fontSize: screenWidth / 20,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Check In",
-                                      style: TextStyle(
-                                        fontFamily: "NexaRegular",
-                                        fontSize: screenWidth / 20,
-                                        color: Colors.black54,
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Check Out",
+                                        style: TextStyle(
+                                          fontFamily: "NexaRegular",
+                                          fontSize: screenWidth / 20,
+                                          color: Colors.black54,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      snap[index]['checkIn'],
-                                      style: TextStyle(
-                                        fontFamily: "NexaBold",
-                                        fontSize: screenWidth / 20,
+                                      Text(
+                                        DateFormat.Hm().format(snap[index]['checkOut'].toDate()), // Format DateTime to display only time
+                                        style: TextStyle(
+                                          fontFamily: "NexaBold",
+                                          fontSize: screenWidth / 20,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Check Out",
-                                      style: TextStyle(
-                                        fontFamily: "NexaRegular",
-                                        fontSize: screenWidth / 20,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                    Text(
-                                      snap[index]['checkOut'],
-                                      style: TextStyle(
-                                        fontFamily: "NexaBold",
-                                        fontSize: screenWidth / 20,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ) : const SizedBox();
+                              ],
+                            ),
+                          );
+                        } else {
+                          return SizedBox();
+                        }
                       },
                     );
-
-                  }else{
-                    return const SizedBox();
+                  } else {
+                    return SizedBox();
                   }
                 },
               ),
@@ -306,5 +318,3 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 }
-
-

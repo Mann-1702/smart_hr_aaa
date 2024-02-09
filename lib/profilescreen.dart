@@ -3,9 +3,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_hr_aaa/todayscreen.dart';
 import 'dart:io';
 
 import 'MyRewards.dart';
+import 'calendarscreen.dart';
+import 'homescreen.dart';
 import 'model/user.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -100,6 +103,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             ListTile(
               title: Text(
+                'Home',
+                style: TextStyle(
+                  fontFamily: 'NexaRegular',
+                  fontSize: 17,
+                  color: primary,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => HomeScreen()));
+              },
+            ),
+            ListTile(
+              title: const Text(
                 'Rewards',
                 style: TextStyle(
                   fontFamily: 'NexaRegular',
@@ -107,7 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               onTap: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => MyRewards()));
               },
@@ -124,7 +142,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               //   // Navigator.pop(context);
               // },
             ),
-            // Add more ListTile items as needed
+            Container(
+              margin: const EdgeInsets.only(top: 280),
+            ),
+            const Divider(),
+            const ListTile(
+              title: Text(
+                'Copyright © 2024 TechnoGuide Infosoft',
+                style: TextStyle(
+                  fontFamily: 'NexaRegular',
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
           ],
         ),
       ),

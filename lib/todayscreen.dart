@@ -8,9 +8,10 @@ import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:smart_hr_aaa/model/user.dart';
-import 'package:smart_hr_aaa/myrewards.dart';
 import 'package:smart_hr_aaa/profilescreen.dart';
 import 'package:smart_hr_aaa/services/location_service.dart';
+
+import 'MyRewards.dart';
 
 class TodayScreen extends StatefulWidget {
   const TodayScreen({Key? key}) : super(key: key);
@@ -29,6 +30,11 @@ class _TodayScreenState extends State<TodayScreen> {
   String scanResult = " ";
   String officeCode = " ";
 
+  String checkInLocation = " ";
+
+  String checkOutLocation = " ";
+
+
   Color primary = const Color(0xffeef444c);
 
   @override
@@ -38,14 +44,24 @@ class _TodayScreenState extends State<TodayScreen> {
     _getOfficeCode();
   }
 
+  // void _getLocation() async {
+  //   List<Placemark> placemark = await placemarkFromCoordinates(User.lat, User.long);
+  //
+  //   setState(() {
+  //     location = "${placemark[0].street}, ${placemark[0].administrativeArea}, ${placemark[0].postalCode}, ${placemark[0].country}";
+  //   });
+  // }
+
   void _getLocation() async {
     try {
       double? latitude = await LocationService().getLatitude();
       double? longitude = await LocationService().getLongitude();
 
       if (latitude != null && longitude != null) {
+        List<Placemark> placemark = await placemarkFromCoordinates(latitude, longitude);
+
         setState(() {
-          location = "Latitude: $latitude, Longitude: $longitude";
+          location = "${placemark[0].name}, ${placemark[0].street} , ${placemark[0].administrativeArea}, ${placemark[0].postalCode}, ${placemark[0].country}";
         });
       } else {
         print("Error: Failed to get location coordinates.");
@@ -54,7 +70,6 @@ class _TodayScreenState extends State<TodayScreen> {
       print("Error: $_getLocation - $e");
     }
   }
-
   void _getOfficeCode() async {
     DocumentSnapshot snap = await FirebaseFirestore.instance.collection("Attributes").doc("Office1").get();
     setState(() {
@@ -98,11 +113,15 @@ class _TodayScreenState extends State<TodayScreen> {
       setState(() {
         checkInTimestamp = snap2['checkIn'];
         checkOutTimestamp = snap2['checkOut'];
+        checkInLocation = snap2['checkInLocation'] ?? location;
+        checkOutLocation = snap2['checkOutLocation'] ?? location;
       });
     } catch (e) {
       setState(() {
         checkInTimestamp = null;
         checkOutTimestamp = null;
+        checkInLocation = location;
+        checkOutLocation = location;
       });
     }
   }
@@ -380,7 +399,8 @@ class _TodayScreenState extends State<TodayScreen> {
                     innerColor: primary,
                     key: key,
                     onSubmit: () async {
-                      if (User.lat != 0) {
+
+                      if(User.lat != 0) {
                         _getLocation();
                         QuerySnapshot snap = await FirebaseFirestore.instance
                             .collection(("Employee"))
@@ -397,17 +417,34 @@ class _TodayScreenState extends State<TodayScreen> {
                           if (checkInTimestamp == null) {
                             setState(() {
                               checkInTimestamp = Timestamp.now();
+                              checkInLocation = location;
                             });
-                            await recordRef.set({
+                            await FirebaseFirestore.instance
+                                .collection("Employee")
+                                .doc(snap.docs[0].id)
+                                .collection("Record")
+                                .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
+                                .set({
                               'date': Timestamp.now(),
                               'checkIn': Timestamp.now(),
+                              'checkOut': null,
+                              'checkInLocation': checkInLocation,
+
                             });
                           } else {
                             setState(() {
                               checkOutTimestamp = Timestamp.now();
+                              checkOutLocation = location;
                             });
-                            await recordRef.update({
+                            await FirebaseFirestore.instance
+                                .collection("Employee")
+                                .doc(snap.docs[0].id)
+                                .collection("Record")
+                                .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
+                                .update({
                               'checkOut': Timestamp.now(),
+
+                              'checkOutLocation': checkOutLocation,
                             });
                           }
                         } catch (e) {

@@ -4,6 +4,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_hr_aaa/homescreen.dart';
+import 'package:smart_hr_aaa/todayscreen.dart';
 
 import 'admintodayscreen.dart';
 
@@ -47,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 Container(
                   margin: const EdgeInsets.only(top: 20),
-                  height: 300,
+                  height: 293,
                   child: Lottie.asset("assets/logingif.json"),
                 ),
               ],

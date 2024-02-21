@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:intl/intl.dart';
@@ -30,7 +31,7 @@ class _AdminTodayScreenState extends State<AdminTodayScreen> {
     super.initState();
     fetchData();
     // Refresh QR code every 5 minutes
-    timer = Timer.periodic(const Duration(seconds: 2), (timer) {
+    timer = Timer.periodic(const Duration(minutes: 5), (timer) {
       fetchData();
     });
   }
@@ -41,13 +42,28 @@ class _AdminTodayScreenState extends State<AdminTodayScreen> {
     super.dispose();
   }
 
-  void fetchData() {
-    // This can be replaced with actual data fetching logic
-    // For demonstration purposes, generating a random string
-    setState(() {
-      qrData = DateTime.now().toString(); // Replace with your data
-    });
+  void fetchData() async {
+    try {
+      // Generate QR code data
+      String qrData = DateTime.now().toString();
+
+      // Save QR code data to Firestore
+      await FirebaseFirestore.instance
+          .collection("qrCodes")
+          .doc(DateFormat('yyyyMMddHHmmss').format(DateTime.now()))
+          .set({
+        'qrData': qrData,
+      });
+
+      // Update state with the generated QR code data
+      setState(() {
+        this.qrData = qrData;
+      });
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
   }
+
 
 
   @override

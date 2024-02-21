@@ -1,12 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:month_year_picker/month_year_picker.dart';
-import 'package:smart_hr_aaa/profilescreen.dart';
-import 'package:smart_hr_aaa/model/user.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
-
-
+import 'package:smart_hr_aaa/model/user.dart';
+import 'package:smart_hr_aaa/profilescreen.dart';
 import 'MyRewards.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -24,16 +21,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   late DateTime selectedMonth;
 
+  Timestamp? checkOut;
+  Timestamp? checkIn;
+
   @override
   void initState() {
     super.initState();
     selectedMonth = DateTime.now();
   }
 
+  void _getRecord() async {
+    setState(() {
+      checkIn = null;
+      checkOut = null;
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    screenHeight = MediaQuery.of(context).size.height;
-    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -51,14 +65,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
               decoration: const BoxDecoration(
                 color: Color(0xffeef444c),
               ),
-              child:  Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => ProfileScreen()));
+                          MaterialPageRoute(
+                              builder: (context) => ProfileScreen()));
                     },
                     child: const CircleAvatar(
                       backgroundColor: Colors.white,
@@ -70,7 +85,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 10),
                   Text(
                     'Hello, ' + User.employeeId,
@@ -206,17 +220,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     .doc(User.id)
                     .collection("Record")
                     .snapshots(),
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasData) {
                     final snap = snapshot.data!.docs;
                     return ListView.builder(
+
                       itemCount: snap.length,
                       itemBuilder: (context, index) {
                         final recordDate = snap[index]['date'] as Timestamp;
-                        final formattedDate = DateFormat('MMMM yyyy').format(recordDate.toDate());
-                        if (formattedDate == DateFormat('MMMM yyyy').format(selectedMonth)) {
+                        final formattedDate = DateFormat('MMMM yyyy').format(
+                            recordDate.toDate());
+                        if (formattedDate == DateFormat('MMMM yyyy').format(
+                            selectedMonth)) {
+                          final checkIn = snap[index]['checkIn'] as Timestamp?;
+                          final checkOut = snap[index]['checkOut'] as Timestamp?;
                           return Container(
-                            margin: EdgeInsets.only(top: index > 0 ? 12 : 0, left: 6, right: 6),
+                            margin: EdgeInsets.only(
+                                top: index > 0 ? 12 : 0, left: 6, right: 6),
                             height: 80,
                             decoration: const BoxDecoration(
                               color: Colors.white,
@@ -227,7 +248,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   offset: Offset(2, 2),
                                 ),
                               ],
-                              borderRadius: BorderRadius.all(Radius.circular(20)),
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(20)),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -238,11 +260,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     margin: const EdgeInsets.only(),
                                     decoration: BoxDecoration(
                                       color: primary,
-                                      borderRadius: const BorderRadius.all(Radius.circular(20)),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20)),
                                     ),
                                     child: Center(
                                       child: Text(
-                                        DateFormat('EE\ndd').format(recordDate.toDate()),
+                                        DateFormat('EE\ndd').format(
+                                            recordDate.toDate()),
                                         style: TextStyle(
                                           fontFamily: "NexaBold",
                                           fontSize: screenWidth / 20,
@@ -255,7 +279,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 Expanded(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment
+                                        .center,
                                     children: [
                                       Text(
                                         "Check In",
@@ -266,7 +291,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         ),
                                       ),
                                       Text(
-                                        DateFormat.Hm().format(snap[index]['checkIn'].toDate()), // Format DateTime to display only time
+                                        checkIn != null ?
+                                        DateFormat.Hm().format(checkIn.toDate())
+                                            : '--/--',
                                         style: TextStyle(
                                           fontFamily: "NexaBold",
                                           fontSize: screenWidth / 20,
@@ -278,7 +305,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 Expanded(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment
+                                        .center,
                                     children: [
                                       Text(
                                         "Check Out",
@@ -289,7 +317,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         ),
                                       ),
                                       Text(
-                                        DateFormat.Hm().format(snap[index]['checkOut'].toDate()), // Format DateTime to display only time
+                                        checkOut != null ?
+                                        DateFormat.Hm().format(
+                                            checkOut.toDate())
+                                            : '--/--',
                                         style: TextStyle(
                                           fontFamily: "NexaBold",
                                           fontSize: screenWidth / 20,

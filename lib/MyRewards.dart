@@ -4,6 +4,7 @@ import 'package:smart_hr_aaa/todayscreen.dart';
 import 'PointAccumulationPage.dart';
 import 'RedemOptionpage.dart';
 import 'ReferralBonusespage.dart';
+import 'TranndevScreen.dart';
 import 'calendarscreen.dart';
 import 'homescreen.dart';
 import 'model/user.dart';
@@ -86,7 +87,7 @@ class MyRewards extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            const ListTile(
+            ListTile(
               title: Text(
                 'Training & Development',
                 style: TextStyle(
@@ -94,9 +95,12 @@ class MyRewards extends StatelessWidget {
                   fontSize: 17,
                 ),
               ),
-              // onTap: () {
-              //   // Navigator.pop(context);
-              // },
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TranndevScreen()));
+              },
+
             ),
             Container(
               margin: const EdgeInsets.only(top: 280),

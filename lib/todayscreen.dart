@@ -7,14 +7,17 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:slide_to_act/slide_to_act.dart';
+//import 'package:smart_hr_aaa/TranndevScreen.dart';
 import 'package:smart_hr_aaa/model/user.dart';
 import 'package:smart_hr_aaa/profilescreen.dart';
 import 'package:smart_hr_aaa/services/location_service.dart';
 
 import 'MyRewards.dart';
+import 'TranndevScreen.dart';
 
 class TodayScreen extends StatefulWidget {
   const TodayScreen({Key? key}) : super(key: key);
+
 
   @override
   State<TodayScreen> createState() => _TodayScreenState();
@@ -23,6 +26,8 @@ class TodayScreen extends StatefulWidget {
 class _TodayScreenState extends State<TodayScreen> {
   double screenHeight = 0;
   double screenWidth = 0;
+
+  bool isDataMatched=false;
 
   Timestamp? checkInTimestamp;
   Timestamp? checkOutTimestamp;
@@ -44,13 +49,6 @@ class _TodayScreenState extends State<TodayScreen> {
     _getOfficeCode();
   }
 
-  // void _getLocation() async {
-  //   List<Placemark> placemark = await placemarkFromCoordinates(User.lat, User.long);
-  //
-  //   setState(() {
-  //     location = "${placemark[0].street}, ${placemark[0].administrativeArea}, ${placemark[0].postalCode}, ${placemark[0].country}";
-  //   });
-  // }
 
   void _getLocation() async {
     try {
@@ -87,6 +85,12 @@ class _TodayScreenState extends State<TodayScreen> {
         false,
         ScanMode.QR,
       );
+      // Check if the scanned QR code matches with the data in Firebase
+      bool match = await _checkQRData(result);
+      setState(() {
+        scanResult = result;
+        isDataMatched = match;
+      });
     } catch (e) {
       print("Error");
     }
@@ -94,6 +98,21 @@ class _TodayScreenState extends State<TodayScreen> {
     setState(() {
       scanResult = result;
     });
+  }
+
+  Future<bool> _checkQRData(String qrData) async {
+    // Fetch the data from Firebase and compare with the scanned QR code data
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection(("qrCodes"))
+          .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
+          .get();
+      String firebaseData = snapshot['qrData'];
+      return qrData == firebaseData;
+    } catch (e) {
+      print("Error checking QR data: $e");
+      return false;
+    }
   }
 
   void _getRecord() async {
@@ -170,7 +189,7 @@ class _TodayScreenState extends State<TodayScreen> {
 
                   const SizedBox(height: 10),
                   Text(
-                    'Hello, ' + User.employeeId,
+                    'Hello, ${User.employeeId}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontFamily: 'NexaBold',
@@ -207,7 +226,7 @@ class _TodayScreenState extends State<TodayScreen> {
                     MaterialPageRoute(builder: (context) => MyRewards()));
               },
             ),
-            const ListTile(
+            ListTile(
               title: Text(
                 'Training & Development',
                 style: TextStyle(
@@ -215,9 +234,12 @@ class _TodayScreenState extends State<TodayScreen> {
                   fontSize: 17,
                 ),
               ),
-              // onTap: () {
-              //   // Navigator.pop(context);
-              // },
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TranndevScreen()));
+              },
+
             ),
             Container(
               margin: const EdgeInsets.only(top: 280),
@@ -261,87 +283,93 @@ class _TodayScreenState extends State<TodayScreen> {
                 ),
               ),
             ),
-            Container(
-              alignment: Alignment.centerLeft,
-              margin: const EdgeInsets.only(top: 32),
-              child: Text(
-                "Today's Status",
-                style: TextStyle(
-                  color: Colors.black54,
-                  fontFamily: "NexaBold",
-                  fontSize: screenWidth / 18,
+            Visibility(
+              visible: isDataMatched,
+              child: Container(
+                alignment: Alignment.centerLeft,
+                margin: const EdgeInsets.only(top: 32),
+                child: Text(
+                  "Today's Status",
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontFamily: "NexaBold",
+                    fontSize: screenWidth / 18,
+                  ),
                 ),
               ),
             ),
-            Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 32),
-              height: 150,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(2, 2),
-                  ),
-                ],
-                borderRadius: BorderRadius.all(Radius.circular(20)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Check In",
-                          style: TextStyle(
-                            fontFamily: "NexaRegular",
-                            fontSize: screenWidth / 20,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        Text(
-                          checkInTimestamp != null
-                              ? DateFormat('hh:mm a').format(checkInTimestamp!.toDate())
-                              : "--/--",
-                          style: TextStyle(
-                            fontFamily: "NexaBold",
-                            fontSize: screenWidth / 18,
-                          ),
-                        ),
-                      ],
+            Visibility(
+              visible: isDataMatched,
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 32),
+                height: 150,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(2, 2),
                     ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Check Out",
-                          style: TextStyle(
-                            fontFamily: "NexaRegular",
-                            fontSize: screenWidth / 20,
-                            color: Colors.black54,
+                  ],
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Check In",
+                            style: TextStyle(
+                              fontFamily: "NexaRegular",
+                              fontSize: screenWidth / 20,
+                              color: Colors.black54,
+                            ),
                           ),
-                        ),
-                        Text(
-                          checkOutTimestamp != null
-                              ? DateFormat('hh:mm a').format(checkOutTimestamp!.toDate())
-                              : "--/--",
-                          style: TextStyle(
-                            fontFamily: "NexaBold",
-                            fontSize: screenWidth / 18,
+                          Text(
+                            checkInTimestamp != null
+                                ? DateFormat('hh:mm a').format(checkInTimestamp!.toDate())
+                                : "--/--",
+                            style: TextStyle(
+                              fontFamily: "NexaBold",
+                              fontSize: screenWidth / 18,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Check Out",
+                            style: TextStyle(
+                              fontFamily: "NexaRegular",
+                              fontSize: screenWidth / 20,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          Text(
+                            checkOutTimestamp != null
+                                ? DateFormat('hh:mm a').format(checkOutTimestamp!.toDate())
+                                : "--/--",
+                            style: TextStyle(
+                              fontFamily: "NexaBold",
+                              fontSize: screenWidth / 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Container(
@@ -383,91 +411,96 @@ class _TodayScreenState extends State<TodayScreen> {
               },
             ),
             checkOutTimestamp == null
-                ? Container(
-              margin: const EdgeInsets.only(top: 24, bottom: 12),
-              child: Builder(
-                builder: (context) {
-                  final GlobalKey<SlideActionState> key = GlobalKey();
-                  return SlideAction(
-                    text: checkInTimestamp == null ? "Slide to Check In" : "Slide to Check Out",
-                    textStyle: TextStyle(
-                      color: Colors.black54,
-                      fontSize: screenWidth / 20,
-                      fontFamily: "NexaRegular",
-                    ),
-                    outerColor: Colors.white,
-                    innerColor: primary,
-                    key: key,
-                    onSubmit: () async {
+                ? Visibility(
+              visible: isDataMatched,
+              child: Container(
+                margin: const EdgeInsets.only(top: 24, bottom: 12),
+                child: Builder(
+                  builder: (context) {
+                    final GlobalKey<SlideActionState> key = GlobalKey();
+                    return SlideAction(
+                      text: checkInTimestamp == null ? "Slide to Check In" : "Slide to Check Out",
+                      textStyle: TextStyle(
+                        color: Colors.black54,
+                        fontSize: screenWidth / 20,
+                        fontFamily: "NexaRegular",
+                      ),
+                      outerColor: Colors.white,
+                      innerColor: primary,
+                      key: key,
+                      onSubmit: () async {
 
-                      if(User.lat != 0) {
-                        _getLocation();
-                        QuerySnapshot snap = await FirebaseFirestore.instance
-                            .collection(("Employee"))
-                            .where('id', isEqualTo: User.employeeId)
-                            .get();
+                        if(User.lat != 0) {
+                          _getLocation();
+                          QuerySnapshot snap = await FirebaseFirestore.instance
+                              .collection(("Employee"))
+                              .where('id', isEqualTo: User.employeeId)
+                              .get();
 
-                        DocumentReference recordRef = FirebaseFirestore.instance
-                            .collection("Employee")
-                            .doc(snap.docs[0].id)
-                            .collection("Record")
-                            .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()));
+                          DocumentReference recordRef = FirebaseFirestore.instance
+                              .collection("Employee")
+                              .doc(snap.docs[0].id)
+                              .collection("Record")
+                              .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()));
 
-                        try {
-                          if (checkInTimestamp == null) {
-                            setState(() {
-                              checkInTimestamp = Timestamp.now();
-                              checkInLocation = location;
-                            });
-                            await FirebaseFirestore.instance
-                                .collection("Employee")
-                                .doc(snap.docs[0].id)
-                                .collection("Record")
-                                .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
-                                .set({
-                              'date': Timestamp.now(),
-                              'checkIn': Timestamp.now(),
-                              'checkOut': null,
-                              'checkInLocation': checkInLocation,
+                          try {
+                            if (checkInTimestamp == null) {
+                              setState(() {
+                                checkInTimestamp = Timestamp.now();
+                              });
+                              await  FirebaseFirestore.instance
+                                  .collection("Employee")
+                                  .doc(snap.docs[0].id)
+                                  .collection("Record")
+                                  .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
+                                  .set({
+                                'date': Timestamp.now(),
+                                'checkIn': Timestamp.now(),
+                                'checkInLocation': checkInLocation,
 
-                            });
-                          } else {
-                            setState(() {
-                              checkOutTimestamp = Timestamp.now();
-                              checkOutLocation = location;
-                            });
-                            await FirebaseFirestore.instance
-                                .collection("Employee")
-                                .doc(snap.docs[0].id)
-                                .collection("Record")
-                                .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
-                                .update({
-                              'checkOut': Timestamp.now(),
+                              });
+                            } else {
+                              setState(() {
+                                checkOutTimestamp = Timestamp.now();
+                                checkOutLocation = location;
 
-                              'checkOutLocation': checkOutLocation,
-                            });
+                              });
+                              await FirebaseFirestore.instance
+                                  .collection("Employee")
+                                  .doc(snap.docs[0].id)
+                                  .collection("Record")
+                                  .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
+                                  .update({
+                                'checkOut': Timestamp.now(),
+
+                                'checkOutLocation': checkOutLocation,
+                              });
+                            }
+                          } catch (e) {
+                            print("Error updating record: $e");
                           }
-                        } catch (e) {
-                          print("Error updating record: $e");
-                        }
 
-                        key.currentState!.reset();
-                      } else {
-                        // Handle location unavailable
-                      }
-                    },
-                  );
-                },
+                          key.currentState!.reset();
+                        } else {
+                          // Handle location unavailable
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
             )
-                : Container(
-              margin: const EdgeInsets.only(top: 32, bottom: 32),
-              child: Text(
-                "You have completed this day!",
-                style: TextStyle(
-                  fontFamily: "NexaRegular",
-                  fontSize: screenWidth / 20,
-                  color: Colors.black54,
+                : Visibility(
+              visible: isDataMatched,
+              child: Container(
+                margin: const EdgeInsets.only(top: 32, bottom: 32),
+                child: Text(
+                  "You have completed this day!",
+                  style: TextStyle(
+                    fontFamily: "NexaRegular",
+                    fontSize: screenWidth / 20,
+                    color: Colors.black54,
+                  ),
                 ),
               ),
             ),

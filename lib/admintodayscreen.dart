@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:smart_hr_aaa/RegistrationPage.dart';
 import 'package:smart_hr_aaa/profilescreen.dart';
 import 'package:timer_builder/timer_builder.dart';
 
@@ -47,10 +48,13 @@ class _AdminTodayScreenState extends State<AdminTodayScreen> {
       // Generate QR code data
       String qrData = DateTime.now().toString();
 
-      // Save QR code data to Firestore
+      // Define the document ID based on the current date and time
+      String documentId = DateFormat('yyyyMMddHHmmss').format(DateTime.now());
+
+      // Save QR code data to Firestore with the defined document ID
       await FirebaseFirestore.instance
           .collection("qrCodes")
-          .doc(DateFormat('yyyyMMddHHmmss').format(DateTime.now()))
+          .doc(DateFormat('dd MMMM yyyy').format(DateTime.now()))
           .set({
         'qrData': qrData,
       });
@@ -63,6 +67,7 @@ class _AdminTodayScreenState extends State<AdminTodayScreen> {
       print("Error fetching data: $e");
     }
   }
+
 
 
 
@@ -167,6 +172,21 @@ class _AdminTodayScreenState extends State<AdminTodayScreen> {
               // onTap: () {
               //   // Navigator.pop(context);
               // },
+            ),
+            ListTile(
+              title: const Text(
+                'Registration',
+                style: TextStyle(
+                  fontFamily: 'NexaRegular',
+                  fontSize: 17,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const RegistrationPage()));
+              },
             ),
             Container(
               margin: const EdgeInsets.only(top: 280),

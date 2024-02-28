@@ -109,9 +109,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           sharedPreferences.setString('employeeId', id).then((_) {
                             if (id == "admin@123" && password == "admin@123") {
                               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AdminTodayScreen()));
-                            } else {
-                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
                             }
+                            else {
+
+                                Navigator.pushReplacement(context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomeScreen()));
+                              }
+
                           });
                         }
                         else{

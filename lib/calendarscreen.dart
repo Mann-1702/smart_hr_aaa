@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'package:smart_hr_aaa/TranndevScreen.dart';
 import 'package:smart_hr_aaa/model/user.dart';
 import 'package:smart_hr_aaa/profilescreen.dart';
 import 'MyRewards.dart';
@@ -124,7 +125,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     MaterialPageRoute(builder: (context) => MyRewards()));
               },
             ),
-            const ListTile(
+             ListTile(
               title: Text(
                 'Training & Development',
                 style: TextStyle(
@@ -132,9 +133,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   fontSize: 17,
                 ),
               ),
-              // onTap: () {
-              //   // Navigator.pop(context);
-              // },
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TranndevScreen()));
+              },
+
             ),
             Container(
               margin: const EdgeInsets.only(top: 280),

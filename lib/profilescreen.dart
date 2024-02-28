@@ -7,6 +7,7 @@ import 'package:smart_hr_aaa/todayscreen.dart';
 import 'dart:io';
 
 import 'MyRewards.dart';
+import 'TranndevScreen.dart';
 import 'calendarscreen.dart';
 import 'homescreen.dart';
 import 'model/user.dart';
@@ -130,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     MaterialPageRoute(builder: (context) => MyRewards()));
               },
             ),
-            const ListTile(
+            ListTile(
               title: Text(
                 'Training & Development',
                 style: TextStyle(
@@ -138,9 +139,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontSize: 17,
                 ),
               ),
-              // onTap: () {
-              //   // Navigator.pop(context);
-              // },
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TranndevScreen()));
+              },
+
             ),
             Container(
               margin: const EdgeInsets.only(top: 280),

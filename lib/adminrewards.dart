@@ -5,6 +5,7 @@ import 'package:smart_hr_aaa/admintodayscreen.dart';
 import 'PointAccumulationPage.dart';
 import 'RedemOptionpage.dart';
 import 'ReferralBonusespage.dart';
+import 'RegistrationPage.dart';
 import 'adminpointaccumulation.dart';
 import 'homescreen.dart';
 import 'model/user.dart';
@@ -106,6 +107,22 @@ class _AdminRewardsState extends State<AdminRewards> {
               // onTap: () {
               //   // Navigator.pop(context);
               // },
+            ),
+            ListTile(
+              title: Text(
+                'Register new Employee',
+                style: TextStyle(
+                  fontFamily: 'NexaRegular',
+                  fontSize: 17,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>  RegistrationPage()));
+              },
+
             ),
             Container(
               margin: const EdgeInsets.only(top: 280),

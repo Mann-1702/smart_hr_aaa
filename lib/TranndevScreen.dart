@@ -1,10 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:smart_hr_aaa/profilescreen.dart';
 
 import 'MyRewards.dart';
+import 'homescreen.dart';
 import 'model/user.dart';
 
 class TranndevScreen extends StatefulWidget {
@@ -22,7 +26,81 @@ class _TranndevScreenState extends State<TranndevScreen> {
   final Color primary = const Color(0xffeef444c);
   bool _isSelectedHTML = false;
   bool _isSelectedCSS = false;
-  bool _isSelectedJavaScript = false; // Define _isSelected variable and initialize it with false
+  bool _isSelectedJavaScript = false;
+  List<String> skillsData = [];
+  List<String> languagesData = [];
+
+  final TextEditingController skillsController = TextEditingController();
+  final TextEditingController languagesController = TextEditingController();
+
+  @override
+  void dispose() {
+    skillsController.dispose();
+    languagesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> submitForm() async {
+
+    if (skillsController.text.isEmpty || languagesController.text.isEmpty || _selectedItem.isEmpty ||
+        _selectedDate==null || _selectedEndDate==null || _certificatePath==null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter all the above fields!')),
+      );
+      return; // Exit the function early
+    }
+
+    QuerySnapshot snap = await FirebaseFirestore.instance
+        .collection(("Employee"))
+        .where('id', isEqualTo: User.employeeId)
+        .get();
+
+    DocumentReference recordRef = FirebaseFirestore.instance
+        .collection("Employee")
+        .doc(snap.docs[0].id)
+        .collection("Traindev")
+        .doc(skillsController.text);
+
+    try {
+
+      await  FirebaseFirestore.instance
+          .collection("Employee")
+          .doc(snap.docs[0].id)
+          .collection("Traindev")
+          .doc(skillsController.text)
+          .set({
+        'skills': skillsController.text,
+        'languages': languagesController.text,
+        'reference': _selectedItem,
+        'startDate': _selectedDate,
+        'endDate': _selectedEndDate,
+        'certificate': _certificatePath,
+      });
+      skillsController.clear();
+      languagesController.clear();
+
+      setState(() {
+        _selectedDate = null;
+        _selectedEndDate = null;
+        _certificatePath = null;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Data saved successfully')),
+      );
+    }
+    catch (e) {
+      print("Error updating record: $e");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSkillsData();
+    fetchLanguagesData();
+  }
+
   Future<void> _pickCertificate() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     _certificatePath = "Selected Certificate File Path"; // Replace this with actual file path
@@ -45,122 +123,189 @@ class _TranndevScreenState extends State<TranndevScreen> {
     return picked;
   }
 
+
+  Future<void> fetchSkillsData() async {
+    try {
+      QuerySnapshot snap = await FirebaseFirestore.instance
+          .collection("Employee")
+          .where('id', isEqualTo: User.employeeId)
+          .get();
+
+      List<String> allSkills = []; // List to store skills from all dates
+
+      // Fetch documents from the Traindev collection
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("Employee")
+          .doc(snap.docs[0].id)
+          .collection("Traindev")
+          .get();
+
+      // Iterate through each document and retrieve skills
+      querySnapshot.docs.forEach((doc) {
+        String skills = doc.get('skills');
+        if (skills != null && skills.isNotEmpty) {
+          allSkills.add(skills); // Add skills to the list
+        }
+      });
+
+      setState(() {
+        skillsData = allSkills; // Update skillsData with skills from all dates
+      });
+
+    } catch (e) {
+      print('Error fetching skills data: $e');
+    }
+  }
+
+
+  Future<void> fetchLanguagesData() async {
+    try {
+      QuerySnapshot snap = await FirebaseFirestore.instance
+          .collection("Employee")
+          .where('id', isEqualTo: User.employeeId)
+          .get();
+
+      List<String> allLanguages = [];
+
+      // Fetch documents from the Traindev collection
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("Employee")
+          .doc(snap.docs[0].id)
+          .collection("Traindev")
+          .get();
+
+      // Iterate through each document and retrieve skills
+      querySnapshot.docs.forEach((doc) {
+        String languages = doc.get('languages');
+        if (languages != null && languages.isNotEmpty) {
+          allLanguages.add(languages); // Add skills to the list
+        }
+      });
+
+      setState(() {
+        languagesData = allLanguages; // Update skillsData with skills from all dates
+      });
+
+    } catch (e) {
+      print('Error fetching languages data: $e');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    appBar: AppBar(
-      title: const Text(
-        'Smart HR',
-        style: TextStyle(
-          fontFamily: 'NexaBold',
-        ),
-      ),
-    );
-    drawer: Drawer(
-    child: ListView( padding: EdgeInsets.zero,
-    children: <Widget>[DrawerHeader(
-    decoration: const BoxDecoration(
-    color: Color(0xffeef444c),
-    ),
-    child:  Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [GestureDetector(
-    onTap: () {
-    Navigator.push(context,MaterialPageRoute(builder: (context) => ProfileScreen()));
-    },
-    child: const CircleAvatar(
-    backgroundColor: Colors.white,
-    radius: 40,
-    child: Icon(
-    Icons.person,
-    color: Colors.black26,
-    size: 55,
-    ),
-    ),
-    ),
 
-    const SizedBox(height: 10),
-    Text(
-    'Hello, ${User.employeeId}',
-    style: const TextStyle(
-    color: Colors.white,
-    fontFamily: 'NexaBold',
-    fontSize: 24,
-    ),
-    ),
-    ],
-    ),
-    ),
-    ListTile(
-    title: Text(
-    'Home',
-    style: TextStyle(
-    fontFamily: 'NexaRegular',
-    fontSize: 17,
-    color: primary,
-    ),
-    ),
-    onTap: () {
-    Navigator.pop(context);
-    },
-    ),
-    ListTile(
-    title: const Text(
-    'Rewards',
-    style: TextStyle(
-    fontFamily: 'NexaRegular',
-    fontSize: 17,
-    ),
-    ),
-    onTap: () {
-    Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => MyRewards()));
-    },
-    ),
-    ListTile(
-    title: Text(
-    'Training & Development',
-    style: TextStyle(
-    fontFamily: 'NexaRegular',
-    fontSize: 17,
-    ),
-    ),
-    onTap: () {
-    Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => TranndevScreen()));
-    },
-
-    ),
-    Container(
-    margin: const EdgeInsets.only(top: 280),
-    ),
-    const Divider(),
-    const ListTile(
-    title: Text(
-    'Copyright © 2024 TechnoGuide Infosoft',
-    style: TextStyle(
-    fontFamily: 'NexaRegular',
-    fontSize: 14,
-    color: Colors.grey,
-    ),
-    ),
-    ),
-    ],
-    ),
-    );
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            'TRAINING AND DEVELOPMENT',
+          title: const Text(
+            'Training & Development',
             style: TextStyle(
-                fontSize: 18,
-                fontFamily: "NexaBold",
+                fontFamily: "NexaRegular",
                 color: Colors.white),
           ),
           backgroundColor: primary,
+          iconTheme: const IconThemeData(
+            color: Colors.white,
+          ),
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Color(0xffeef444c),
+                ),
+                child:  Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ProfileScreen()));
+                      },
+                      child: const CircleAvatar(
+                        backgroundColor: Colors.white,
+                        radius: 40,
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.black26,
+                          size: 55,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                    Text(
+                      'Hello, ${User.employeeId}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'NexaBold',
+                        fontSize: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ListTile(
+                title: const Text(
+                  'Home',
+                  style: TextStyle(
+                    fontFamily: 'NexaRegular',
+                    fontSize: 17,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()));
+                },
+              ),
+              ListTile(
+                title: const Text(
+                  'Rewards',
+                  style: TextStyle(
+                    fontFamily: 'NexaRegular',
+                    fontSize: 17,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MyRewards()));
+                },
+              ),
+              ListTile(
+                title: Text(
+                  'Training & Development',
+                  style: TextStyle(
+                    fontFamily: 'NexaRegular',
+                    fontSize: 17,
+                    color: primary,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              Container(
+                margin: const EdgeInsets.only(top: 280),
+              ),
+              const Divider(),
+              const ListTile(
+                title: Text(
+                  'Copyright © 2024 TechnoGuide Infosoft',
+                  style: TextStyle(
+                    fontFamily: 'NexaRegular',
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         body: TabBarView(
           children: [
@@ -182,7 +327,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                           color: primary.withOpacity(0.5), // Shadow color
                           spreadRadius: 5, // Spread radius
                           blurRadius: 7, // Blur radius
-                          offset: Offset(0, 3), // Offset in x and y directions
+                          offset: const Offset(0, 3), // Offset in x and y directions
                         ),
                       ],
                     ),
@@ -195,7 +340,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                   Container(
                     width: 400,
                     height: 240,
-                    margin: EdgeInsets.only(bottom: 8.0),
+                    margin: const EdgeInsets.only(bottom: 8.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius for rounded corners
@@ -204,18 +349,18 @@ class _TranndevScreenState extends State<TranndevScreen> {
                           color: primary.withOpacity(0.5), // Shadow color
                           spreadRadius: 5, // Spread radius
                           blurRadius: 7, // Blur radius
-                          offset: Offset(0, 3), // Offset in x and y directions
+                          offset: const Offset(0, 3), // Offset in x and y directions
                         ),
                       ],
                     ),
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: Padding(
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Skills :',
                               style: TextStyle(
                                 fontSize: 18,
@@ -224,16 +369,17 @@ class _TranndevScreenState extends State<TranndevScreen> {
                               ),
                             ),
 
-                            SizedBox(height: 1.0), // Add some space between the text and the text field
+                            const SizedBox(height: 1.0), // Add some space between the text and the text field
                             TextField(
-                              decoration: InputDecoration(
+                              controller: skillsController,
+                              decoration: const InputDecoration(
                                 hintText: 'Enter your skills',
                                 border: OutlineInputBorder(),
                               ),
                             ),
 
-                            SizedBox(height: 8.0),
-                            Text(
+                            const SizedBox(height: 8.0),
+                            const Text(
                               'Languages :',
                               style: TextStyle(
                                 fontSize: 18,
@@ -241,9 +387,10 @@ class _TranndevScreenState extends State<TranndevScreen> {
                                 color: Colors.black,
                               ),
                             ),
-                            SizedBox(height: 1.0), // Add some space between the text and the text field
+                            const SizedBox(height: 1.0), // Add some space between the text and the text field
                             TextField(
-                              decoration: InputDecoration(
+                              controller: languagesController,
+                              decoration: const InputDecoration(
                                 hintText: 'Enter your skills',
                                 border: OutlineInputBorder(),
                               ),
@@ -261,7 +408,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                   Container(
                     width: 400,
                     height: 120,
-                    margin: EdgeInsets.only(bottom: 8.0),
+                    margin: const EdgeInsets.only(bottom: 8.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius for rounded corners
@@ -270,7 +417,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                           color: primary.withOpacity(0.5), // Shadow color
                           spreadRadius: 5, // Spread radius
                           blurRadius: 7, // Blur radius
-                          offset: Offset(0, 3), // Offset in x and y directions
+                          offset: const Offset(0, 3), // Offset in x and y directions
                         ),
                       ],
                     ),
@@ -281,7 +428,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Reference resources:',
                               style: TextStyle(
                                 fontSize: 18,
@@ -293,8 +440,9 @@ class _TranndevScreenState extends State<TranndevScreen> {
                               children: [
                                 DropdownButton<String>(
                                   value: _selectedItem,
-                                  items: [
+                                  items: const [
                                     DropdownMenuItem(
+                                      value: 'Item 1',
                                       child: Row(
                                         children: <Widget>[
                                           Icon(Icons.assistant_photo,
@@ -303,9 +451,9 @@ class _TranndevScreenState extends State<TranndevScreen> {
                                           Text('AI assistance'),
                                         ],
                                       ),
-                                      value: 'Item 1',
                                     ),
                                     DropdownMenuItem(
+                                      value: 'Item 2',
                                       child: Row(
                                         children: <Widget>[
                                           Icon(Icons.code,
@@ -314,9 +462,9 @@ class _TranndevScreenState extends State<TranndevScreen> {
                                           Text('Github'),
                                         ],
                                       ),
-                                      value: 'Item 2',
                                     ),
                                     DropdownMenuItem(
+                                      value: 'Item 3',
                                       child: Row(
                                         children: <Widget>[
                                           Icon(Icons.video_library,
@@ -325,9 +473,9 @@ class _TranndevScreenState extends State<TranndevScreen> {
                                           Text('Youtube'),
                                         ],
                                       ),
-                                      value: 'Item 3',
                                     ),
                                     DropdownMenuItem(
+                                      value: 'Item 4',
                                       child: Row(
                                         children: <Widget>[
                                           Icon(Icons.web,
@@ -336,23 +484,15 @@ class _TranndevScreenState extends State<TranndevScreen> {
                                           Text('Online-template'),
                                         ],
                                       ),
-                                      value: 'Item 4',
                                     ),
                                   ],
-                                  onChanged: (value) {
+                                  onChanged: (value) async {
                                     setState(() {
                                       _selectedItem = value!; // Update selected item
                                     });
                                   },
                                 ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Selected: $_selectedItem', // Show selected item here
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
+                                const SizedBox(width: 8),
                               ],
                             ),
                           ],
@@ -365,7 +505,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                   Container(
                     width: 400,
                     height: 145,
-                    margin: EdgeInsets.only(bottom: 8.0),
+                    margin: const EdgeInsets.only(bottom: 8.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius for rounded corners
@@ -374,18 +514,18 @@ class _TranndevScreenState extends State<TranndevScreen> {
                           color: primary.withOpacity(0.5), // Shadow color
                           spreadRadius: 5, // Spread radius
                           blurRadius: 7, // Blur radius
-                          offset: Offset(0, 3), // Offset in x and y directions
+                          offset: const Offset(0, 3), // Offset in x and y directions
                         ),
                       ],
                     ),
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: Padding(
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Duration time:',
                               style: TextStyle(
                                 fontSize: 18,
@@ -395,7 +535,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                             ),
                             Row(
                               children: [
-                                Text(
+                                const Text(
                                   'Starting date:',
                                   style: TextStyle(
                                     fontSize: 14,
@@ -403,7 +543,9 @@ class _TranndevScreenState extends State<TranndevScreen> {
                                     color: Colors.black,
                                   ),
                                 ),
-                                SizedBox(width: 8.0),
+                                const SizedBox(width: 8.0),
+
+
                                 ElevatedButton(
                                   onPressed: () async {
                                     DateTime? startDate = await _selectDate(context);
@@ -414,71 +556,94 @@ class _TranndevScreenState extends State<TranndevScreen> {
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
-                                      primary: primary // Background color of button
-                                  ),
-                                  child: Text(
-                                    'Select Date',
-                                    style: TextStyle(
-                                      color: Colors.white, // Color of the text
+                                    backgroundColor: primary, // Background color
+                                    foregroundColor: Colors.white, // Text color
+                                    elevation: 5, // Elevation
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10), // BorderRadius
                                     ),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 10), // Padding
+                                  ),
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Select Date',
+                                        style: TextStyle(fontSize: 14, fontFamily: 'NexaRegular'),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                SizedBox(width: 8.0),
+
+                                const SizedBox(width: 8.0),
                                 _selectedDate != null
                                     ? Text(
                                   '${_selectedDate!.day}-${_selectedDate!.month}-${_selectedDate!.year}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     fontFamily: "NexaBold",
                                     color: Colors.black,
                                   ),
                                 )
-                                    : SizedBox.shrink(),
+                                    : const SizedBox.shrink(),
                               ],
                             ),
 
                             Row(
                               children: [
-                                Text(
-                                  'Ending date:', // Change 'Starting date' to 'End date'
+                                const Text(
+                                  'Ending date:    ', // Change 'Starting date' to 'End date'
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontFamily: "NexaBold",
                                     color: Colors.black,
                                   ),
                                 ),
-                                SizedBox(width: 8.0),
+                                const SizedBox(width: 8.0),
                                 ElevatedButton(
                                   onPressed: () async {
-                                    DateTime? endDate = await _selectDate(context); // Change variable name to endDate
-                                    if (endDate != null) {
+                                    DateTime? startEndDate = await _selectDate(context);
+                                    if (startEndDate != null) {
                                       setState(() {
-                                        _selectedEndDate = endDate; // Change _selectedDate to _selectedEndDate
+                                        _selectedEndDate = startEndDate;
                                       });
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    primary: primary, // Background color of button
-                                  ),
-                                  child: Text(
-                                    'Select Date',
-                                    style: TextStyle(
-                                      color: Colors.white, // Color of the text
+                                    backgroundColor: primary, // Background color
+                                    foregroundColor: Colors.white, // Text color
+                                    elevation: 5, // Elevation
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10), // BorderRadius
                                     ),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 10), // Padding
+                                  ),
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Select Date',
+                                        style: TextStyle(fontSize: 14, fontFamily: 'NexaRegular'),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                SizedBox(width: 8.0),
+                                const SizedBox(width: 8.0),
                                 _selectedEndDate != null // Change _selectedDate to _selectedEndDate
                                     ? Text(
                                   '${_selectedEndDate!.day}-${_selectedEndDate!.month}-${_selectedEndDate!.year}',
                                   // Change _selectedDate to _selectedEndDate
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     fontFamily: "NexaBold",
                                     color: Colors.black,
                                   ),
                                 )
-                                    : SizedBox.shrink(),
+                                    : const SizedBox.shrink(),
                               ],
                             ),
                           ],
@@ -511,7 +676,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Certificates:',
                               style: TextStyle(
                                 fontSize: 18,
@@ -519,21 +684,29 @@ class _TranndevScreenState extends State<TranndevScreen> {
                                 color: Colors.black,
                               ),
                             ),
-                            SizedBox(height: 8.0),
+                            const SizedBox(height: 8.0),
                             Row(
                               children: [
                                 ElevatedButton(
                                   onPressed: _pickCertificate,
                                   style: ElevatedButton.styleFrom(
-                                    primary: primary, // Change the color here
+                                    backgroundColor: primary, // Background color
+                                    foregroundColor: Colors.white, // Text color
+                                    elevation: 5, // Elevation
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10), // BorderRadius
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 10), // Padding
                                   ),
-                                  child: Text('Add Certificate'
+                                  child: const Text('Add Certificate'
                                     ,style: TextStyle(
-                                      color: Colors.white, // Color of the text
+                                      color: Colors.white,
+                                      fontFamily: 'NexaRegular',// Color of the text
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 0.0),
+                                const SizedBox(width: 0.0),
                                 _certificatePath != null
                                     ? Container(
                                   decoration: BoxDecoration(
@@ -544,17 +717,17 @@ class _TranndevScreenState extends State<TranndevScreen> {
                                       width: 1.0,
                                     ),
                                   ),
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Text(
                                     _certificatePath!,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 3,
                                       fontFamily: "NexaRegular",
                                       color: Colors.black,
                                     ),
                                   ),
                                 )
-                                    : SizedBox.shrink(),
+                                    : const SizedBox.shrink(),
                               ],
                             ),
                           ],
@@ -576,21 +749,30 @@ class _TranndevScreenState extends State<TranndevScreen> {
                           color: primary.withOpacity(0.5), // Shadow color
                           spreadRadius: 5, // Spread radius
                           blurRadius: 7, // Blur radius
-                          offset: Offset(0, 3), // Offset in x and y directions
+                          offset: const Offset(0, 3), // Offset in x and y directions
                         ),
                       ],
                     ),
                     child: Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          // Add your button onPressed functionality here
+                          submitForm();
                         },
                         style: ElevatedButton.styleFrom(
-                          primary: primary, // Change the color here
+                          backgroundColor: primary, // Background color
+                          foregroundColor: Colors.white, // Text color
+                          elevation: 5, // Elevation
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10), // BorderRadius
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 35), // Padding
                         ),
-                        child: Text('Submit'
+                        child: const Text('Submit'
                           ,style: TextStyle(
-                            color: Colors.white, // Color of the text
+                            color: Colors.white,
+                            fontFamily: 'NexaBold',
+                            fontSize: 18,// Color of the text
                           ),
                         ),
                       ),
@@ -609,7 +791,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                 Container(
                   width: 400,
                   height: 240,
-                  margin: EdgeInsets.only(bottom: 8.0),
+                  margin: const EdgeInsets.only(bottom: 8.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius for rounded corners
@@ -618,21 +800,21 @@ class _TranndevScreenState extends State<TranndevScreen> {
                         color: primary.withOpacity(0.5), // Shadow color
                         spreadRadius: 5, // Spread radius
                         blurRadius: 7, // Blur radius
-                        offset: Offset(0, 3), // Offset in x and y directions
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
                   child: Image.asset(
-                    'assets/images/skills.png', // Replace 'example.jpg' with your image path
-                    fit: BoxFit.cover, // Adjust the fit of the image within the container
+                    'assets/images/skills.png',
+                    fit: BoxFit.cover,
                   ),
                 ),
                 //skill-known container
-                SizedBox(height: 50.0),
+                const SizedBox(height: 50.0),
                 Container(
                   width: 400,
                   height: 300,
-                  margin: EdgeInsets.only(bottom: 8.0),
+                  margin: const EdgeInsets.only(bottom: 8.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10.0), // Optional: Add border radius for rounded corners
@@ -641,18 +823,18 @@ class _TranndevScreenState extends State<TranndevScreen> {
                         color: primary.withOpacity(0.5), // Shadow color
                         spreadRadius: 5, // Spread radius
                         blurRadius: 7, // Blur radius
-                        offset: Offset(0, 3), // Offset in x and y directions
+                        offset: const Offset(0, 3), // Offset in x and y directions
                       ),
                     ],
                   ),
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Skills known by you:',
                             style: TextStyle(
                               fontSize: 21,
@@ -660,8 +842,8 @@ class _TranndevScreenState extends State<TranndevScreen> {
                               color: Colors.black,
                             ),
                           ),
-                          SizedBox(height: 8.0),
-                          Text(
+                          const SizedBox(height: 8.0),
+                          const Text(
                             'Skills :',
                             style: TextStyle(
                               fontSize: 19,
@@ -669,17 +851,24 @@ class _TranndevScreenState extends State<TranndevScreen> {
                               color: Colors.black,
                             ),
                           ),
-                          SizedBox(height: 8.0),
-                          Text(
-                            'Frontend,Backend',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontFamily: "NexaRegular",
-                              color: Colors.black,
+                          const SizedBox(height: 8.0),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: skillsData.length,
+                              itemBuilder: (context, index) {
+                                return Text(
+                                  skillsData[index],
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontFamily: "NexaRegular",
+                                    color: Colors.black,
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                          SizedBox(height: 8.0),
-                          Text(
+                          const SizedBox(height: 8.0),
+                          const Text(
                             'Languages :',
                             style: TextStyle(
                               fontSize: 19,
@@ -687,49 +876,23 @@ class _TranndevScreenState extends State<TranndevScreen> {
                               color: Colors.black,
                             ),
                           ),
-                          SizedBox(height: 10.0),
-                          Text(
-                            'HTML',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontFamily: "NexaRegular",
-                              color: Colors.black,
-                            ),
-                          ),
-                          Text(
-                            'Javascript',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontFamily: "NexaRegular",
-                              color: Colors.black,
-                            ),
-                          ),
-                          Text(
-                            'Bootstrap',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontFamily: "NexaRegular",
-                              color: Colors.black,
-                            ),
-                          ),
-                          Text(
-                            'UI/UX design interface',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontFamily: "NexaRegular",
-                              color: Colors.black,
-                            ),
-                          ),
-                          Text(
-                            'Firebase',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontFamily: "NexaRegular",
-                              color: Colors.black,
+                          const SizedBox(height: 10.0),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: languagesData.length,
+                              itemBuilder: (context, index) {
+                                return Text(
+                                  languagesData[index],
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontFamily: "NexaRegular",
+                                    color: Colors.black,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
-
                       ),
                     ),
                   ),
@@ -770,7 +933,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                   SizedBox(height: 50.0),
                   Container(
                     width: 400,
-                    height: 400,
+                    height: 250,
                     margin: EdgeInsets.only(bottom: 8.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -801,7 +964,7 @@ class _TranndevScreenState extends State<TranndevScreen> {
                             ),
                             SizedBox(height: 8.0),
                             Text(
-                              'Select seminar on the basis of your skills',
+                              'Upcoming Seminars',
                               style: TextStyle(
                                 fontSize: 19,
                                 fontFamily: "NexaRegular",
@@ -809,204 +972,95 @@ class _TranndevScreenState extends State<TranndevScreen> {
                               ),
                             ),
                             SizedBox(height: 16.0),
-                            ListView(
-                              shrinkWrap: true,
-                              children: [
-                                CheckboxListTile(
-                                  title: Text('Seminar on HTML'),
-                                  value: _isSelectedHTML,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      _isSelectedHTML = value!;
-                                    });
-                                  },
-                                ),
-                                CheckboxListTile(
-                                  title: Text('Seminar on CSS'),
-                                  value: _isSelectedCSS,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      _isSelectedCSS = value!;
-                                    });
-                                  },
-                                ),
-                                CheckboxListTile(
-                                  title: Text('Seminar on JavaScript'),
-                                  value: _isSelectedJavaScript,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      _isSelectedJavaScript = value!;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 16.0), // Add space between the ListView and the ElevatedButton
-                            ElevatedButton(
-                              onPressed: () {
-                                // Add functionality for the ElevatedButton
-                              },
-                              style: ElevatedButton.styleFrom(
-                                primary: primary, // Change the color here
-                              ),
-                              child: Text('Submit'
-                                ,style: TextStyle(
-                                  color: Colors.white, // Color of the text
-                                ),
-                              ), // Text displayed on the ElevatedButton
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 50.0),
-                  Container(
-                    width: 400,
-                    height: 300,
-                    margin: EdgeInsets.only(bottom: 8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primary.withOpacity(0.5),
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Up-coming seminar events:',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontFamily: "NexaBold",
-                                color: Colors.black,
-                              ),
-                            ),
-                            SizedBox(height: 16.0),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Add space between the text and image
-                                // Image
-                                Container(
-                                  width: 70,
-                                  height: 70,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: AssetImage('assets/images/dgm.png'), // Replace 'your_image.png' with your image asset
-                                      fit: BoxFit.cover,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                ),
-                                SizedBox(width: 16.0), // Add space between the image and text
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Seminar on Digital Marketing:',
-                                      style: TextStyle(
-                                        fontSize: 19,
-                                        fontFamily: "NexaBold",
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      'This seminar is conducted on', // Add another text below the existing one
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: "NexaRegular",
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                    Text(
-                                      '15th march 2024', // Add another text below the existing one
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: "NexaRegular",
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 16.0),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Add space between the text and image
-                                // Image
-                                Container(
-                                  width: 70,
-                                  height: 70,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: AssetImage('assets/images/uiux.png'), // Replace 'your_image.png' with your image asset
-                                      fit: BoxFit.cover,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                ),
-                                SizedBox(width: 16.0), // Add space between the image and text
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Seminar on UI/UX ',
-                                      style: TextStyle(
-                                        fontSize: 19,
-                                        fontFamily: "NexaBold",
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      'design interface:',
-                                      style: TextStyle(
-                                        fontSize: 19,
-                                        fontFamily: "NexaBold",
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      'This seminar is conducted on', // Add another text below the existing one
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: "NexaRegular",
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                    Text(
-                                      '20th march 2024', // Add another text below the existing one
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: "NexaRegular",
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Container(
+                                height: 130,
+                                child: StreamBuilder(
+                                  stream: FirebaseFirestore.instance.collection('Seminar').snapshots(),
+                                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return Center(child: CircularProgressIndicator());
+                                    }
+                                    if (snapshot.hasError) {
+                                      return Center(child: Text('Error: ${snapshot.error}'));
+                                    }
+                                    final seminars = snapshot.data!.docs;
+                                    final now = DateTime.now().millisecondsSinceEpoch;
+                                    final upcomingSeminars = seminars.where((seminar) => (seminar['date'] as Timestamp).millisecondsSinceEpoch > now).toList();
 
+                                    // Delete expired seminars
+                                    for (final seminar in seminars) {
+                                      final DateTime date = (seminar['date'] as Timestamp).toDate();
+                                      if (date.isBefore(DateTime.now())) {
+                                        seminar.reference.delete();
+                                      }
+                                    }
+
+                                    return ListView.builder(
+                                      shrinkWrap: true,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: upcomingSeminars.length,
+                                      itemBuilder: (context, index) {
+                                        final seminar = upcomingSeminars[index];
+                                        final title = seminar['title'];
+                                        final place = seminar['place'];
+                                        final DateTime date = (seminar['date'] as Timestamp).toDate();
+                                        final formattedDate = '${date.day}/${date.month}/${date.year}';
+                                        return Container(
+                                          width: 200,
+                                          margin: EdgeInsets.only(right: 16.0),
+                                          padding: EdgeInsets.all(8.0),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[200],
+                                            borderRadius: BorderRadius.circular(10.0),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                title,
+                                                style: TextStyle(
+                                                  fontFamily: 'NexaBold',
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(height: 8.0),
+                                              Text(
+                                                place,
+                                                style: TextStyle(
+                                                  fontFamily: 'NexaRegular',
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Date: $formattedDate',
+                                                style: TextStyle(
+                                                  fontFamily: 'NexaRegular',
+                                                  fontSize: 14,
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
+            )
 //---------------------------------------------------------------------------------------------
           ],
         ),
@@ -1014,9 +1068,9 @@ class _TranndevScreenState extends State<TranndevScreen> {
         bottomNavigationBar: TabBar(
           tabs: [
             Tab(
-              icon: Icon(Icons.library_books), // Add icon for 'New learning'
+              icon: const Icon(Icons.library_books), // Add icon for 'New learning'
               child: Container(
-                child: Text(
+                child: const Text(
                   'New learning',
                   style: TextStyle(
                     fontSize: 15,
@@ -1026,38 +1080,34 @@ class _TranndevScreenState extends State<TranndevScreen> {
                 ),// Add text for 'New learning'
               ),
             ),
-            Tab(
+            const Tab(
               icon: Icon(Icons.lightbulb_outline),
-              child: Container(
-                child: Text(
-                  'Skill known',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontFamily: "NexaBold",
-                    color: Colors.black,
-                  ),
-                ),// Add text for 'New learning'
+              child: Text(
+                'Skill known',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontFamily: "NexaBold",
+                  color: Colors.black,
+                ),
               ),// Add icon for 'Skill known'
 
             ),
-            Tab(
+            const Tab(
               icon: Icon(Icons.event), // Add icon for 'Seminar&work-shop'
-              child: Container(
-                child: Text(
-                  'Seminars',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontFamily: "NexaBold",
-                    color: Colors.black,
-                  ),
-                ),// Add text for 'New learning'
+              child: Text(
+                'Seminars',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontFamily: "NexaBold",
+                  color: Colors.black,
+                ),
               ),
             ),
           ],
           labelColor: Colors.redAccent,
           unselectedLabelColor: Colors.grey,
           indicatorSize: TabBarIndicatorSize.label,
-          indicatorPadding: EdgeInsets.all(5.0),
+          indicatorPadding: const EdgeInsets.all(5.0),
           indicatorColor: Colors.redAccent,
         ),
       ),
